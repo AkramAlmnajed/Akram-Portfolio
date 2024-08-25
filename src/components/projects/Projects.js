@@ -32,7 +32,7 @@ const Projects = () => {
           title="Live Chatting Website"
           des="Created a live chatting website where users can register with a name and room ID to chat in private rooms. Implemented using Socket.io and Node.js for the backend, with CORS for cross-origin resource sharing. This project was also developed using React.js."
           src={projectThree}
-          githubLink="https://github.com/AkramAlmnajed/Live-Chat-app"
+          githubLink="https://github.com/AkramAlmnajed/Live-Chat-website"
         />
       </div>
     </section>
