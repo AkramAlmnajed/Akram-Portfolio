@@ -9,9 +9,9 @@ import Resume from "./components/resume/Resume";
 
 function App() {
   return (
-    <div className="w-full h-auto bg-bodyColor text-lightText p-4">
-      <Navbar />
-      <div className="max-w-screen-xl mx-auto">
+        <div className="w-full h-auto bg-bodyColor text-lightText p-4 overflow-hidden">
+<Navbar />
+      <div className="max-w-screen-xl mx-auto overflow-hidden">
         <Banner />
         <Features />
         <Projects />
@@ -22,6 +22,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;
