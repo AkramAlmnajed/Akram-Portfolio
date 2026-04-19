@@ -3,6 +3,7 @@ import projectOne from "./images/projects/projectOne.jpg";
 import projectTwo from "./images/projects/projectTwo.jpg";
 import projectThree from "./images/projects/projectThree.jpg";
 import contactImg from "./images/contact/contactImg.png";
+import profilePhoto from "./images/profilePhoto.jpg";
 
 export {
   bannerImg,
@@ -10,4 +11,5 @@ export {
   projectTwo,
   projectThree,
   contactImg,
+  profilePhoto,
 };

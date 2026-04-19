@@ -1,76 +1,152 @@
-import React from 'react';
-import { useTypewriter, Cursor } from "react-simple-typewriter";
-import { FaFacebookF, FaTelegramPlane, FaLinkedinIn, FaReact } from "react-icons/fa";
-import { SiTailwindcss, SiFlutter, SiMaterialui } from "react-icons/si";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaGithub, FaLinkedinIn, FaFileAlt } from "react-icons/fa";
+import {
+  SiTailwindcss,
+  SiNextdotjs,
+  SiReact,
+  SiTypescript,
+} from "react-icons/si";
+
+const titles = [
+  "Front-End Web Developer",
+  "React / Next.js Developer",
+  "Software Engineer",
+];
 
 const LeftBanner = () => {
-    const [text] = useTypewriter({
-      words: ["Professional Coder.", "Front End Developer.", "React js Developer." , "UI Designer."],
-      loop: true,
-      typeSpeed: 20,
-      deleteSpeed: 10,
-      delaySpeed: 2000,
-    });
+  const [titleIndex, setTitleIndex] = useState(0);
+  const resumePdfUrl =
+    "https://drive.google.com/file/d/1QOX6hhdDhCQu-T73rdr5616WpQkt-7GQ/view?usp=sharing";
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTitleIndex((prev) => (prev + 1) % titles.length);
+    }, 4000); // 4 seconds per word
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleResumeOpen = () => {
+    window.open(resumePdfUrl, "_blank", "noopener,noreferrer");
+  };
 
   return (
-    <div className="w-full lgl:w-1/2 flex flex-col gap-20">
-      <div className="flex flex-col gap-5">
-        <h1 className="text-5xl font-bold text-white">
-          Hi, I'm <span className="text-designColor capitalize">Akram Almnajed</span>
-        </h1>
-        <h2 className="text-4xl font-bold text-white">
-          a <span>{text}</span>
-          <Cursor
-            cursorBlinking="false"
-            cursorStyle="|"
-            cursorColor="#ff014f"
-          />
-        </h2>
-        <p className="text-base font-bodyFont leading-6 tracking-wide">
-        I'm Akram Al-Mnajed, a front-end developer from Damascus, Syria, and a Information Engineering student at Damascus University, specializing in Software Engineering.
-        I have two years of front-end development experience—one year working with Flutter to develop Android apps, and another year focusing on React.js for web development.
-        I'm passionate about continuous learning and always eager to expand my skills.
-        </p>
+    <div className="w-full lgl:w-[56%] flex flex-col gap-10">
+      <div className="flex flex-col gap-6 relative">
+        <motion.p
+          initial={{ y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="text-xs uppercase tracking-[0.22em] text-designColor font-semibold"
+        >
+          Front-End Engineering
+        </motion.p>
+        <motion.h1
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-4xl md:text-5xl xl:text-6xl font-extrabold text-white leading-[1.08] tracking-tight"
+        >
+          <span className="text-designColor whitespace-nowrap">
+            Akram Al-Mnajed
+          </span>
+        </motion.h1>
+
+        <div className="h-12 md:h-16 relative overflow-hidden flex items-center">
+          <AnimatePresence mode="popLayout">
+            <motion.h2
+              key={titles[titleIndex]}
+              initial={{ y: 22, opacity: 0, filter: "blur(6px)" }}
+              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+              exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="text-2xl md:text-3xl xl:text-4xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-slate-100 via-blue-200 to-slate-300 absolute"
+            >
+              {titles[titleIndex]}
+            </motion.h2>
+          </AnimatePresence>
+        </div>
+
+        <motion.p
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="text-base md:text-lg font-bodyFont leading-relaxed tracking-wide text-slate-300/95 max-w-2xl"
+        >
+          Front-End Web Developer with 3+ years of experience delivering
+          production-grade applications in React.js, Next.js, and TypeScript.
+          Currently contributing to Thiqa Education on a large online school
+          platform while building scalable interfaces and integrating APIs
+          across modern backend stacks.
+        </motion.p>
       </div>
-      <div className="flex flex-col xl:flex-row gap-6 lgl:gap-0 justify-between">
+
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="flex flex-col lgl:flex-row lgl:flex-wrap xl:flex-nowrap gap-8 lgl:gap-10 xl:gap-14 justify-start"
+      >
         <div>
-          <h2 className="text-base uppercase font-titleFont mb-4">
-            Find me in
+          <h2 className="text-[11px] uppercase font-titleFont mb-4 text-slate-400 font-bold tracking-[0.2em]">
+            CONNECT
           </h2>
           <div className="flex gap-4">
-            <a href="https://facebook.com/Akram.Almnajed" target="_blank" rel="noopener noreferrer" className="bannerIcon">
-              <FaFacebookF />
+            <a
+              href="https://github.com/AkramAlmnajed"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bannerIcon group hover:-translate-y-1 hover:border-designColor transition-all duration-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+            >
+              <FaGithub className="text-slate-300 group-hover:text-white transition-colors duration-500" />
             </a>
-            <a href="https://t.me/Almnajed" target="_blank" rel="noopener noreferrer" className="bannerIcon">
-              <FaTelegramPlane />
-            </a>
-            <a href="https://www.linkedin.com/in/akram-almnajed-5a06801a6/" target="_blank" rel="noopener noreferrer" className="bannerIcon">
-              <FaLinkedinIn />
+            <a
+              href="https://www.linkedin.com/in/akram-almnajed-5a06801a6/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bannerIcon group hover:-translate-y-1 hover:border-designColor transition-all duration-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+            >
+              <FaLinkedinIn className="text-slate-300 group-hover:text-white transition-colors duration-500" />
             </a>
           </div>
         </div>
         <div>
-          <h2 className="text-base uppercase font-titleFont mb-4">
-            BEST SKILLS ON
+          <h2 className="text-[11px] uppercase font-titleFont mb-4 text-slate-400 font-bold tracking-[0.2em]">
+            PRIMARY STACK
           </h2>
           <div className="flex gap-4">
-            <a href="https://reactjs.org/docs/getting-started.html" target="_blank" rel="noopener noreferrer" className="bannerIcon">
-              <FaReact />
-            </a>
-            <a href="https://docs.flutter.dev/" target="_blank" rel="noopener noreferrer" className="bannerIcon">
-              <SiFlutter />
-            </a>
-            <a href="https://tailwindcss.com/docs" target="_blank" rel="noopener noreferrer" className="bannerIcon">
-              <SiTailwindcss />
-            </a>
-            <a href="https://mui.com/material-ui/getting-started/overview/" target="_blank" rel="noopener noreferrer" className="bannerIcon">
-              <SiMaterialui />
-            </a>
+            <div className="bannerIcon cursor-default shadow-lg hover:border-designColor hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-500">
+              <SiReact className="text-slate-300 pointer-events-none" />
+            </div>
+            <div className="bannerIcon cursor-default shadow-lg hover:border-designColor hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-500">
+              <SiNextdotjs className="text-slate-300 pointer-events-none" />
+            </div>
+            <div className="bannerIcon cursor-default shadow-lg hover:border-designColor hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-500">
+              <SiTypescript className="text-slate-300 pointer-events-none" />
+            </div>
+            <div className="bannerIcon cursor-default shadow-lg hover:border-designColor hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-500">
+              <SiTailwindcss className="text-slate-300 pointer-events-none" />
+            </div>
           </div>
         </div>
-      </div>
+        <div>
+          <h2 className="text-[11px] uppercase font-titleFont mb-4 text-slate-400 font-bold tracking-[0.2em]">
+            MY RESUME
+          </h2>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={handleResumeOpen}
+              aria-label="Open resume PDF"
+              className="bannerIcon group hover:-translate-y-1 hover:border-designColor transition-all duration-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+            >
+              <FaFileAlt className="text-slate-300 group-hover:text-white transition-colors duration-500" />
+            </button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
-}
+};
 
 export default LeftBanner;

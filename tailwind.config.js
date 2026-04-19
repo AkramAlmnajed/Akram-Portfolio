@@ -14,17 +14,18 @@ module.exports = {
         xl: "1280px",
       },
       fontFamily: {
-        bodyFont: ["Poppins", "sans-serif"],
-        titleFont: ["Montserrat", "sans-serif"],
+        bodyFont: ["Manrope", "Poppins", "sans-serif"],
+        titleFont: ["Sora", "Montserrat", "sans-serif"],
       },
       colors: {
-        bodyColor: "#212428",
-        lightText: "#c4cfde",
-        boxBg: "linear-gradient(145deg, #1e2024, #23272b)",
-        designColor: "#ff014f",
+        bodyColor: "#0B1120",
+        lightText: "#94a3b8", // slate-400
+        boxBg: "#111b33",
+        designColor: "#3B82F6", // blue-500
+        designColorHover: "#60A5FA",
       },
       boxShadow: {
-        shadowOne: "10px 10px 19px #1c1e22, -10px -10px 19px #262a2e",
+        shadowOne: "0 10px 30px -10px rgba(2, 6, 23, 0.5)",
       },
     },
   },
