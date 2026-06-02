@@ -1,44 +1,65 @@
 import React from "react";
-import { BsGithub } from "react-icons/bs";
+import { motion, useReducedMotion } from "framer-motion";
+import { BsGithub, BsBoxArrowUpRight } from "react-icons/bs";
+import useCardHover from "../layouts/useCardHover";
 
-const ProjectsCard = ({ title, des, githubLink, tags, visibility }) => {
+const ProjectsCard = ({ title, des, githubLink, tags, visibility, index }) => {
+  const reduce = useReducedMotion();
+  const numeral = index != null ? String(index).padStart(2, "0") : "";
+  // A github.com URL is source code; anything else is a live site to visit.
+  const isRepo = /github\.com/i.test(githubLink || "");
+  const destination = isRepo ? "GitHub repository" : "live site";
+
+  // 3D tilt + cursor spotlight (gated to true-mouse devices; off under reduced motion).
+  const { ref, handlers, tiltStyle } = useCardHover({ maxTilt: 7, perspective: 1000 });
+
   return (
-    <article className="w-full p-6 xl:px-7 h-auto xl:py-7 rounded-2xl flex flex-col bg-gradient-to-b from-[#101a31] to-[#0b1428] group transition-all duration-500 border border-white/10 hover:border-blue-400/40 shadow-[0_20px_50px_-35px_rgba(59,130,246,0.6)] hover:-translate-y-1.5 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <motion.a
+      ref={ref}
+      href={githubLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${title} — ${visibility} (opens ${destination} in a new tab)`}
+      {...handlers}
+      style={tiltStyle}
+      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileTap={reduce ? undefined : { scale: 0.992 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{
+        duration: 0.5,
+        delay: reduce ? 0 : index ? index * 0.04 : 0,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      className="group glassCardHover relative isolate grid grid-cols-[auto_1fr_auto] items-start gap-4 md:gap-6 py-6 px-5 md:px-8 rounded-control"
+    >
+      {/* Frosted-glass blur pane — blurs the pattern behind the card (see .cardGlass). */}
+      <span aria-hidden="true" className="cardGlass" />
+      {/* Cursor-following gold spotlight — soft, edgeless (see .cardSpotlight). */}
+      <span aria-hidden="true" className="cardSpotlight" />
 
-      <div className="w-full mt-2 flex flex-col gap-6 relative z-10">
-        <div>
-          <div className="flex items-start justify-between">
-            <div className="pr-3">
-              <h3 className="text-xl md:text-2xl font-bold text-slate-100 group-hover:text-blue-100 transition-colors duration-500 leading-snug">
-                {title}
-              </h3>
-              <p className="text-[11px] uppercase tracking-[0.17em] text-designColor font-semibold mt-3">
-                {visibility}
-              </p>
-            </div>
-            <a
-              href={githubLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${title} source or profile`}
-            >
-              <span className="text-lg w-10 h-10 rounded-xl bg-slate-900/90 border border-slate-700/80 inline-flex justify-center items-center text-slate-300 hover:text-white hover:border-designColor hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-300 cursor-pointer">
-                <BsGithub size={18} />
-              </span>
-            </a>
-          </div>
-          <p className="text-sm tracking-wide mt-4 text-slate-300/90 group-hover:text-slate-200 transition-colors duration-500 leading-relaxed">
-            {des}
-          </p>
-        </div>
+      {/* Content lift: numeral → title → icon shift/brighten in sequence on hover
+          (staggered via group-hover transition-delay; snappy, no delay, on leave). */}
+      <span className="relative z-10 font-monoFont text-mono text-inkMuted pt-1 transition-[color,transform] duration-base ease-out group-hover:text-accent group-hover:-translate-y-0.5">
+        {numeral}
+      </span>
 
+      <div className="relative z-10 flex flex-col gap-2">
+        <h3 className="font-titleFont text-h4 md:text-h3 text-accent leading-tight w-fit drawUnderline transition-transform duration-base ease-out group-hover:translate-x-0.5 group-hover:[transition-delay:45ms]">
+          {title}
+        </h3>
+        <p className="font-monoFont text-mono uppercase tracking-[0.16em] text-inkMuted">
+          {visibility}
+        </p>
+        <p className="font-bodyFont text-inkMuted leading-relaxed max-w-[62ch]">
+          {des}
+        </p>
         {tags && (
-          <div className="flex flex-wrap gap-2 mt-2 relative z-10">
-            {tags.map((tag, i) => (
+          <div className="flex flex-wrap gap-x-5 gap-y-1 mt-1">
+            {tags.map((tag) => (
               <span
-                key={i}
-                className="text-xs font-semibold px-3 py-1.5 bg-blue-900/20 text-blue-100 rounded-full border border-blue-400/25 group-hover:bg-designColor/15 transition-colors duration-500 backdrop-blur-sm"
+                key={tag}
+                className="font-monoFont text-mono text-inkMuted"
               >
                 {tag}
               </span>
@@ -46,8 +67,17 @@ const ProjectsCard = ({ title, des, githubLink, tags, visibility }) => {
           </div>
         )}
       </div>
-    </article>
+
+      <span
+        aria-hidden="true"
+        className="relative z-10 text-inkMuted pt-1 opacity-60 transition-[opacity,transform,color] duration-base ease-out group-hover:opacity-100 group-hover:text-accent group-hover:-translate-y-0.5 group-hover:rotate-[12deg] group-hover:[transition-delay:85ms]"
+      >
+        {isRepo ? <BsGithub size={18} /> : <BsBoxArrowUpRight size={17} />}
+      </span>
+    </motion.a>
   );
 };
 
-export default ProjectsCard;
+// Memoized: props come from stable module-level data, so cards never re-render
+// after mount (verified: scroll/hover trigger zero re-renders here).
+export default React.memo(ProjectsCard);

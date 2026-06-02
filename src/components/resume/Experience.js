@@ -60,7 +60,7 @@ const Experience = () => {
       className="w-full flex flex-col gap-10"
     >
       <div>
-        <div className="mt-4 lgl:mt-10 w-full h-auto border-l-[2px] border-l-slate-700/60 flex flex-col gap-8">
+        <div className="mt-2 w-full flex flex-col">
           {experienceData.map((item) => (
             <ResumeCard
               key={item.company + item.period}

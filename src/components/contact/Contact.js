@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import emailjs from "@emailjs/browser";
+import { motion, useReducedMotion } from "framer-motion";
 import Title from "../layouts/Title";
 import ContactLeft from "./ContactLeft";
 
@@ -97,6 +98,7 @@ const resolveFormSubmitErrorMessage = (error) => {
 };
 
 const Contact = () => {
+  const reduce = useReducedMotion();
   const [formData, setFormData] = useState(initialFormData);
   const [fieldErrors, setFieldErrors] = useState({});
   const [status, setStatus] = useState({ type: "", message: "" });
@@ -291,17 +293,23 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="w-full py-24 sectionDivider">
-      <div className="flex justify-center items-center text-center">
-        <Title title="LET'S CONNECT" des="Contact" />
-      </div>
-      <div className="w-full">
-        <div className="w-full h-auto flex flex-col lgl:flex-row lgl:items-stretch justify-between gap-6 lgl:gap-8 mt-6">
-          <div className="w-full lgl:w-[40%] flex">
+    <section id="contact" className="w-full py-24 lgl:py-32 sectionDivider">
+      <Title title="LET'S CONNECT" des="Contact" index={5} />
+      <motion.div
+        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full"
+      >
+        <div className="w-full flex flex-col lgl:flex-row justify-between gap-10 lgl:gap-16 mt-8">
+          <div className="w-full lgl:w-[38%]">
             <ContactLeft />
           </div>
-          <div className="w-full lgl:w-[60%] flex">
-            <div className="w-full h-full py-8 bg-gradient-to-b from-[#101a31] to-[#0b1428] flex flex-col gap-8 p-5 lgl:p-8 rounded-2xl shadow-[0_20px_60px_-35px_rgba(59,130,246,0.65)] border border-white/10">
+          <div className="w-full lgl:w-[62%]">
+            {/* Calmer panel: translucent frosted surface + hairline + soft warm
+                contact shadow, instead of the previous heavy gold glow. */}
+            <div className="w-full flex flex-col gap-8 p-6 lgl:p-8 rounded-control border border-line bg-surface/60 backdrop-blur-md shadow-contact">
               <form
                 className="w-full h-full flex flex-col gap-4 lgl:gap-6 py-2 lgl:py-5"
                 onSubmit={handleSend}
@@ -309,10 +317,10 @@ const Contact = () => {
               >
                 {status.message && (
                   <p
-                    className={`py-3 shadow-md text-center text-sm md:text-base tracking-wide rounded-lg border ${
+                    className={`py-3 text-center text-sm md:text-base tracking-wide rounded-control border ${
                       status.type === "error"
-                        ? "bg-red-900/20 text-red-300 border-red-800/40"
-                        : "bg-emerald-900/20 text-emerald-300 border-emerald-800/40"
+                        ? "bg-red-950/25 text-red-200/90 border-red-900/30"
+                        : "bg-emerald-950/25 text-emerald-200/90 border-emerald-900/30"
                     }`}
                     role="status"
                     aria-live="polite"
@@ -322,97 +330,142 @@ const Contact = () => {
                 )}
                 <div className="w-full flex flex-col lgl:flex-row gap-10">
                   <div className="w-full lgl:w-1/2 flex flex-col gap-4">
-                    <p className="text-xs text-slate-400 uppercase tracking-[0.14em] font-semibold">
+                    <label
+                      htmlFor="contact-name"
+                      className="font-monoFont text-mono uppercase tracking-[0.16em] text-inkMuted"
+                    >
                       Your Name
-                    </p>
+                    </label>
                     <input
+                      id="contact-name"
                       onChange={handleInputChange("username")}
                       value={formData.username}
-                      className={`contactInput ${fieldErrors.username ? "border-red-500 focus:border-red-500 focus:ring-red-500/40" : ""}`}
+                      className={`contactInput ${fieldErrors.username ? "border-danger focus:border-danger focus:ring-danger/40" : ""}`}
                       name="name"
                       type="text"
                       autoComplete="name"
+                      aria-invalid={fieldErrors.username ? true : undefined}
+                      aria-describedby={fieldErrors.username ? "contact-name-error" : undefined}
                       disabled={isSubmitting}
                     />
                     {fieldErrors.username && (
-                      <p className="text-xs text-red-400 tracking-wide">
+                      <p
+                        id="contact-name-error"
+                        className="font-monoFont text-mono text-danger tracking-wide"
+                      >
                         {fieldErrors.username}
                       </p>
                     )}
                   </div>
                   <div className="w-full lgl:w-1/2 flex flex-col gap-4">
-                    <p className="text-xs text-slate-400 uppercase tracking-[0.14em] font-semibold">
+                    <label
+                      htmlFor="contact-phone"
+                      className="font-monoFont text-mono uppercase tracking-[0.16em] text-inkMuted"
+                    >
                       Phone Number
-                    </p>
+                    </label>
                     <input
+                      id="contact-phone"
                       onChange={handleInputChange("phoneNumber")}
                       value={formData.phoneNumber}
-                      className={`contactInput ${fieldErrors.phoneNumber ? "border-red-500 focus:border-red-500 focus:ring-red-500/40" : ""}`}
+                      className={`contactInput ${fieldErrors.phoneNumber ? "border-danger focus:border-danger focus:ring-danger/40" : ""}`}
                       name="phone"
                       type="tel"
                       autoComplete="tel"
+                      aria-invalid={fieldErrors.phoneNumber ? true : undefined}
+                      aria-describedby={fieldErrors.phoneNumber ? "contact-phone-error" : undefined}
                       disabled={isSubmitting}
                     />
                     {fieldErrors.phoneNumber && (
-                      <p className="text-xs text-red-400 tracking-wide">
+                      <p
+                        id="contact-phone-error"
+                        className="font-monoFont text-mono text-danger tracking-wide"
+                      >
                         {fieldErrors.phoneNumber}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <p className="text-xs text-slate-400 uppercase tracking-[0.14em] font-semibold">
+                  <label
+                    htmlFor="contact-email"
+                    className="font-monoFont text-mono uppercase tracking-[0.16em] text-inkMuted"
+                  >
                     Email
-                  </p>
+                  </label>
                   <input
+                    id="contact-email"
                     onChange={handleInputChange("email")}
                     value={formData.email}
-                    className={`contactInput ${fieldErrors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500/40" : ""}`}
+                    className={`contactInput ${fieldErrors.email ? "border-danger focus:border-danger focus:ring-danger/40" : ""}`}
                     name="email"
                     type="email"
                     autoComplete="email"
+                    aria-invalid={fieldErrors.email ? true : undefined}
+                    aria-describedby={fieldErrors.email ? "contact-email-error" : undefined}
                     disabled={isSubmitting}
                   />
                   {fieldErrors.email && (
-                    <p className="text-xs text-red-400 tracking-wide">
+                    <p
+                      id="contact-email-error"
+                      className="font-monoFont text-mono text-danger tracking-wide"
+                    >
                       {fieldErrors.email}
                     </p>
                   )}
                 </div>
                 <div className="flex flex-col gap-4">
-                  <p className="text-xs text-slate-400 uppercase tracking-[0.14em] font-semibold">
+                  <label
+                    htmlFor="contact-subject"
+                    className="font-monoFont text-mono uppercase tracking-[0.16em] text-inkMuted"
+                  >
                     Subject
-                  </p>
+                  </label>
                   <input
+                    id="contact-subject"
                     onChange={handleInputChange("subject")}
                     value={formData.subject}
-                    className={`contactInput ${fieldErrors.subject ? "border-red-500 focus:border-red-500 focus:ring-red-500/40" : ""}`}
+                    className={`contactInput ${fieldErrors.subject ? "border-danger focus:border-danger focus:ring-danger/40" : ""}`}
                     name="subject"
                     type="text"
                     autoComplete="off"
+                    aria-invalid={fieldErrors.subject ? true : undefined}
+                    aria-describedby={fieldErrors.subject ? "contact-subject-error" : undefined}
                     disabled={isSubmitting}
                   />
                   {fieldErrors.subject && (
-                    <p className="text-xs text-red-400 tracking-wide">
+                    <p
+                      id="contact-subject-error"
+                      className="font-monoFont text-mono text-danger tracking-wide"
+                    >
                       {fieldErrors.subject}
                     </p>
                   )}
                 </div>
                 <div className="flex flex-col gap-4">
-                  <p className="text-xs text-slate-400 uppercase tracking-[0.14em] font-semibold">
+                  <label
+                    htmlFor="contact-message"
+                    className="font-monoFont text-mono uppercase tracking-[0.16em] text-inkMuted"
+                  >
                     Message
-                  </p>
+                  </label>
                   <textarea
+                    id="contact-message"
                     onChange={handleInputChange("message")}
                     value={formData.message}
-                    className={`contactTextArea ${fieldErrors.message ? "border-red-500 focus:border-red-500 focus:ring-red-500/40" : ""}`}
+                    className={`contactTextArea ${fieldErrors.message ? "border-danger focus:border-danger focus:ring-danger/40" : ""}`}
                     name="message"
                     cols="30"
                     rows="8"
+                    aria-invalid={fieldErrors.message ? true : undefined}
+                    aria-describedby={fieldErrors.message ? "contact-message-error" : undefined}
                     disabled={isSubmitting}
                   ></textarea>
                   {fieldErrors.message && (
-                    <p className="text-xs text-red-400 tracking-wide">
+                    <p
+                      id="contact-message-error"
+                      className="font-monoFont text-mono text-danger tracking-wide"
+                    >
                       {fieldErrors.message}
                     </p>
                   )}
@@ -421,7 +474,7 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-12 bg-designColor text-white rounded-xl text-sm md:text-base tracking-[0.14em] uppercase font-semibold hover:bg-designColorHover disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-designColor transition-colors duration-300 shadow-lg shadow-blue-500/20"
+                    className="w-full h-12 bg-accent text-accentText rounded-control text-sm md:text-base tracking-[0.14em] uppercase font-semibold shadow-glow hover:bg-accentDim disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-accent transition-[background-color,transform,box-shadow] duration-base ease-out active:scale-[0.97]"
                   >
                     {isSubmitting ? "Sending..." : "Send Message"}
                   </button>
@@ -430,7 +483,7 @@ const Contact = () => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };

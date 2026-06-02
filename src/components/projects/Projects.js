@@ -1,13 +1,16 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Title from "../layouts/Title";
 import ProjectsCard from "./ProjectsCard";
 
+// `githubLink` is the single per-card link slot. It holds a github.com repo URL
+// OR a live-site URL; ProjectsCard renders a GitHub glyph for repos and an
+// external/visit glyph for live sites, so the affordance always matches the URL.
 const projectsData = [
   {
     title: "Thiqa Education Platform",
     des: "Contributing to Version 1 of an online school platform at Thiqa Education. Focused on scalable React.js and TypeScript interfaces integrated with Express.js and Odoo services.",
-    githubLink: "https://github.com/AkramAlmnajed",
+    githubLink: "https://tutor-portal.thiqaeducation.com/login",
     tags: ["React.js", "TypeScript", "Express.js", "Odoo"],
     visibility: "Professional Project",
   },
@@ -21,7 +24,7 @@ const projectsData = [
   {
     title: "Emergency Assistance Map Platform",
     des: "Built a real-time interactive map application for conflict-affected communities with responsive UI and live data integration, optimized for reliability in low-bandwidth scenarios.",
-    githubLink: "https://github.com/AkramAlmnajed",
+    githubLink: "https://mapping.reparametrize.org/",
     tags: ["React.js", "Real-Time Data", "Responsive UI"],
     visibility: "Volunteer Project",
   },
@@ -44,22 +47,22 @@ const projectsData = [
   {
     title: "Live Chatting Website",
     des: "Built a real-time chat application with private rooms, secure authentication, and Socket.io integration to support reliable low-latency communication.",
-    githubLink: "https://github.com/AkramAlmnajed",
+    githubLink: "https://github.com/AkramAlmnajed/Live-Chat-website",
     tags: ["React.js", "Socket.io", "Authentication"],
     visibility: "Resume Case Study",
   },
 ];
 
 const Projects = () => {
+  const reduce = useReducedMotion();
   return (
-    <section id="projects" className="w-full py-24 sectionDivider">
-      <div className="flex justify-center items-center text-center">
-        <Title title="SELECTED PROJECTS" des="Relevant Project Work" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 xl:gap-7 mt-8">
-        {projectsData.map((project) => (
+    <section id="projects" className="w-full py-24 lgl:py-32 sectionDivider">
+      <Title title="SELECTED PROJECTS" des="Relevant Project Work" index={3} />
+      <div className="mt-8 flex flex-col">
+        {projectsData.map((project, i) => (
           <ProjectsCard
             key={project.title}
+            index={i + 1}
             title={project.title}
             des={project.des}
             githubLink={project.githubLink}
@@ -69,19 +72,30 @@ const Projects = () => {
         ))}
       </div>
 
-      <div className="w-full flex justify-center mt-12">
+      <motion.div
+        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full flex mt-10"
+      >
         <motion.a
-          whileHover={{ y: -2, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.2 }}
+          whileTap={reduce ? undefined : { scale: 0.98 }}
+          transition={{ duration: 0.16, ease: [0.2, 0, 0, 1] }}
           href="https://github.com/AkramAlmnajed"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center px-8 h-12 rounded-xl border border-blue-400/35 bg-gradient-to-r from-blue-600/20 to-cyan-500/20 text-blue-100 font-semibold tracking-[0.12em] uppercase text-sm shadow-[0_18px_40px_-30px_rgba(56,189,248,0.95)] hover:border-blue-300/60 hover:text-white hover:shadow-[0_20px_50px_-28px_rgba(59,130,246,0.95)] transition-all duration-300"
+          className="group goldHover overflow-hidden inline-flex items-center gap-3 px-6 h-12 rounded-control border border-line text-inkMuted font-monoFont text-mono uppercase tracking-[0.16em] transition-[color,transform] duration-base ease-out hover:text-ink active:scale-[0.97]"
         >
-          Show More
+          View all on GitHub
+          <span
+            aria-hidden="true"
+            className="transition-transform duration-base ease-out group-hover:translate-x-1"
+          >
+            →
+          </span>
         </motion.a>
-      </div>
+      </motion.div>
     </section>
   );
 };

@@ -1,50 +1,385 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Motion tokens — mechanical precision: snap into alignment, no float */
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
+    --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-flip: cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast: 160ms;
+    --dur-base: 240ms;
+    --dur-slow: 320ms;
+    --dur-reveal: 560ms;
+    --stagger: 60ms;
+
+    /* Color tokens (mirror tailwind.config.js for use in raw CSS / pseudo-elements) */
+    --bg: #16161a; /* warm dark grey (lifted from near-black) */
+    --ink: #f1efe9;
+    --accent: #c9a227;
+    --line: rgba(241, 239, 233, 0.12);
+    /* Background najmeh + dev-motif pattern opacity — single tunable whisper.
+       Gold reads faint on the lifted grey bg; 0.10 keeps it visible yet quiet
+       (AA body text holds with wide margin: thin 1px lines, tiny coverage). */
+    --pattern-opacity: 0.12;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Smooth in-page anchor jumps (skip link, native #links); the global
+       reduced-motion block below forces this back to `auto`. */
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem; /* clear the fixed h-20 navbar */
+    /* Canvas fill lives on <html> ONLY. If <body> also paints this bg it would
+       cover the fixed -z-10 najmeh pattern (body is normal-flow, painted after
+       negative-z layers), hiding it. <html> bg sits behind the pattern. */
+    background-color: var(--bg);
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    color: var(--ink);
+    font-family: "Manrope", system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Keyboard focus — bone calibration tick, never suppressed for keyboard users */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* Reduced motion: collapse transforms/animations to instant; keep color/opacity readable */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer components {
+    /* Icon buttons — faint hairline at rest; the gold-rise gradient (below)
+       blooms in on hover instead of the old gold-bordered box. */
     .bannerIcon {
-        @apply w-12 h-12 bg-slate-900/80 text-slate-300 text-xl inline-flex items-center justify-center rounded-xl shadow-shadowOne border border-white/10 hover:bg-blue-500/20 hover:text-white hover:-translate-y-1 transition-all duration-300;
+        @apply relative overflow-hidden w-12 h-12 bg-surface text-inkMuted text-xl inline-flex items-center justify-center rounded-control border border-line transition-[color,transform,box-shadow] duration-base ease-out hover:text-ink hover:-translate-y-0.5 active:scale-[0.97] active:translate-y-0;
     }
     .resumeLi {
-        @apply w-full h-16 bg-boxBg text-lg text-gray-400 flex justify-center cursor-pointer hover:bg-designColor hover:text-white transition-all duration-300 items-center border border-white/5 shadow-shadowOne rounded-lg;
-    }
-    .bgOpacity {
-        @apply bg-[#0B1120] bg-opacity-90;
+        @apply relative overflow-hidden w-full h-16 bg-surface text-lg text-inkMuted flex justify-center cursor-pointer hover:text-ink transition-colors duration-base items-center border border-line rounded-control;
     }
     .contactInput {
-        @apply w-full h-12 rounded-xl border border-slate-700/70 bg-[#0f172d] text-white px-4 active:outline-none focus:border-designColor focus:ring-1 focus:ring-designColor outline-none duration-300;
+        @apply w-full h-12 rounded-control border border-line bg-surface text-ink px-4 outline-none transition-[border-color,box-shadow] duration-base focus:border-accent focus:ring-1 focus:ring-accent;
     }
     .contactTextArea {
-        @apply w-full rounded-xl border border-slate-700/70 bg-[#0f172d] text-white px-4 py-3 active:outline-none focus:border-designColor focus:ring-1 focus:ring-designColor outline-none duration-300 resize-none;
+        @apply w-full rounded-control border border-line bg-surface text-ink px-4 py-3 outline-none transition-[border-color,box-shadow] duration-base focus:border-accent focus:ring-1 focus:ring-accent resize-none;
     }
+    /* Flat hairline plate — replaces the former backdrop-blur glassmorphism */
     .glassCard {
-        @apply rounded-2xl border border-white/10 bg-gradient-to-b from-[#101a31] to-[#0b1428] shadow-[0_20px_60px_-35px_rgba(59,130,246,0.65)] backdrop-blur-md;
+        @apply rounded-control border border-line bg-surface;
+    }
+    .plate {
+        @apply rounded-control border border-line bg-surface;
     }
     .sectionDivider {
-        @apply border-b border-b-slate-700/50;
+        @apply border-b border-line;
     }
+}
+
+/* Active nav link: a 1px bone underline that draws in left-to-right (no glow) */
+.nav-link {
+    position: relative;
+}
+.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-out);
+}
+.nav-link:hover::after,
+.nav-link.active::after {
+    transform: scaleX(1);
 }
 
 .active {
-    color: white;
+    color: var(--ink);
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .nav-link::after {
+        transition: none;
+    }
+}
+
+/* Gold underline that draws left-to-right when its parent .group is hovered.
+   Replaces the banned 2px side-stripe on project / experience rows. The
+   underline only spans the title text width (inline element), never the row. */
+.drawUnderline {
+    position: relative;
+}
+.drawUnderline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-reveal);
+}
+@media (hover: hover) and (pointer: fine) {
+    .group:hover .drawUnderline::after {
+        transform: scaleX(1);
+    }
+}
+.group:focus-visible .drawUnderline::after {
+    transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+    .drawUnderline::after {
+        transition: none;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Gold glow hover — luminous, EDGELESS. A soft champagne light blooms from the
+   centre-bottom and fades to transparent well before the box edge (no edge-
+   anchored gradients, so no visible rectangle), plus a gentle outer halo that
+   bleeds past the box like ambient light — never a border or outline. Used on
+   small interactive controls (chips, icon buttons, links). Opacity/box-shadow
+   only (GPU-cheap); under reduced motion the global block makes it instant. The
+   ::before sits at the bottom of the element's own (isolated) stacking context,
+   painting under the content and over the page behind.
+   ───────────────────────────────────────────────────────────────────────── */
+.goldHover,
+.bannerIcon,
+.resumeLi {
+    position: relative;
+    isolation: isolate;
+    transition: box-shadow var(--dur-base) var(--ease-out);
+}
+.goldHover::before,
+.bannerIcon::before,
+.resumeLi::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0;
+    background: radial-gradient(
+        115% 135% at 50% 120%,
+        rgba(201, 162, 39, 0.30) 0%,
+        rgba(201, 162, 39, 0.10) 42%,
+        transparent 72%
+    );
+    transition: opacity var(--dur-base) var(--ease-out);
+    pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+    .goldHover:hover::before,
+    .bannerIcon:hover::before,
+    .resumeLi:hover::before {
+        opacity: 1;
+    }
+    .goldHover:hover,
+    .bannerIcon:hover,
+    .resumeLi:hover {
+        box-shadow: 0 6px 30px -10px rgba(201, 162, 39, 0.35);
+    }
+}
+.goldHover:focus-visible::before,
+.goldHover:focus-within::before,
+.bannerIcon:focus-visible::before,
+.resumeLi:focus-visible::before {
+    opacity: 1;
+}
+.goldHover:focus-visible,
+.bannerIcon:focus-visible,
+.resumeLi:focus-visible {
+    box-shadow: 0 6px 30px -10px rgba(201, 162, 39, 0.35);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Frosted-glass card hover — EDGELESS. On hover a translucent, blurred pane
+   fades in BEHIND the card content (the page / tech-logo field behind the card
+   blurs through), carrying a cursor-tracking gold light. A radial mask feathers
+   the pane so the blur dissolves toward the edges: no hard-edged rectangle, no
+   border, no inner ring — just soft illumination. backdrop-filter + opacity only
+   (no layout shift); blur kept ≤ 9px so it stays smooth in Safari. The pane sits
+   at z-index:-1 inside the card's isolated stacking context, so all card content
+   (static flow) paints crisply above it without per-node z-index.
+   ───────────────────────────────────────────────────────────────────────── */
+.cardGlass {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0;
+    /* The frost itself: a translucent milky veil. backdrop-filter blurs +
+       lifts the pattern (najmeh lattice + tech logos) painted behind the card,
+       so on hover that geometry visibly frosts. The gold light is a faint
+       cursor-tracked accent only — the blur is the effect, not a glow. */
+    background:
+        radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(201, 162, 39, 0.10), transparent 64%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.03));
+    /* backdrop-filter is applied ONLY in the hover/focus rules below, so the
+       expensive blur is computed for the single active card — never for the
+       ~13 idle cards at once. */
+    /* Feather the pane edges so the frosted blur fades out with no rectangle. */
+    -webkit-mask-image: radial-gradient(135% 130% at 50% 50%, #000 66%, transparent 100%);
+    mask-image: radial-gradient(135% 130% at 50% 50%, #000 66%, transparent 100%);
+    transition: opacity var(--dur-base) var(--ease-out);
+    pointer-events: none;
+}
+
+/* Whisper-soft edgeless illumination for glass cards — bleeds past the box
+   like ambient light (negative spread = no ring/edge), kept faint so the glass
+   reads as glass, not a gold glow. Applied to the card element so it is not
+   clipped by the card's own overflow. */
+.glassCardHover {
+    transition: box-shadow var(--dur-base) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+    .group:hover .cardGlass {
+        opacity: 1;
+        -webkit-backdrop-filter: blur(12px) saturate(125%);
+        backdrop-filter: blur(12px) saturate(125%);
+    }
+    .glassCardHover:hover {
+        box-shadow: 0 16px 90px -30px rgba(201, 162, 39, 0.20);
+    }
+}
+.group:focus-visible .cardGlass,
+.group:focus-within .cardGlass {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(12px) saturate(125%);
+    backdrop-filter: blur(12px) saturate(125%);
+}
+.glassCardHover:focus-within {
+    box-shadow: 0 16px 90px -30px rgba(201, 162, 39, 0.20);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Cursor-following gold spotlight (project cards). A soft, edgeless radial
+   light positioned at the pointer via --mx/--my (written by ProjectsCard's
+   rAF-throttled handler). Sits above the frosted glass, below the content, so
+   it reads as light on the glass. Opacity-only fade; under reduced motion the
+   vars stay centred (no follow) and the global block makes the fade instant —
+   a calm static glow. Gated to true-mouse devices (no spotlight on touch).
+   ───────────────────────────────────────────────────────────────────────── */
+.cardSpotlight {
+    position: absolute;
+    inset: 0;
+    z-index: -1; /* above .cardGlass (painted later), below all card content */
+    border-radius: inherit;
+    opacity: 0;
+    background: radial-gradient(
+        260px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(201, 162, 39, 0.30),
+        rgba(201, 162, 39, 0.08) 36%,
+        transparent 62%
+    );
+    transition: opacity var(--dur-base) var(--ease-out);
+    pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+    .group:hover .cardSpotlight {
+        opacity: 1;
+    }
+}
+.group:focus-visible .cardSpotlight,
+.group:focus-within .cardSpotlight {
+    opacity: 1;
+}
+
+/* Custom cursor (ring + dot). Native cursor hidden only while active. */
+.has-custom-cursor,
+.has-custom-cursor * {
+    cursor: none !important;
+}
+.cursor-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 200;
+    pointer-events: none;
+    will-change: transform;
+}
+.cursor-ring {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--accent);
+    border-radius: 9999px;
+    transform: translate(-50%, -50%);
+    transition: transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base) var(--ease-out);
+}
+.cursor-dot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 9999px;
+    transform: translate(-50%, -50%);
+    transition: background-color var(--dur-fast) var(--ease-out);
+}
+.cursor-root[data-active="true"] .cursor-ring {
+    transform: translate(-50%, -50%) scale(1.6);
+    border-color: rgba(201, 162, 39, 0.55);
+}
+.cursor-root[data-active="true"] .cursor-dot {
+    background: var(--accent);
+}
 
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
 
 .scrollbar-hide {
-    scrollbar-width: none; 
-    -ms-overflow-style: none; 
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
+/* Thin GOLD scrollbar for in-section scroll regions (e.g. credentials list). */
 .premium-scroll {
     scrollbar-width: thin;
-    scrollbar-color: rgba(96, 165, 250, 0.55) rgba(15, 23, 42, 0.32);
+    scrollbar-color: var(--accent) rgba(201, 162, 39, 0.08);
 }
 
 .premium-scroll::-webkit-scrollbar {
@@ -52,29 +387,167 @@
 }
 
 .premium-scroll::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.35);
+    background: rgba(201, 162, 39, 0.08);
     border-radius: 999px;
 }
 
 .premium-scroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(125, 211, 252, 0.65), rgba(59, 130, 246, 0.75));
+    background: linear-gradient(180deg, var(--accent), #9a7c1c);
     border-radius: 999px;
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    background: radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.14), transparent 35%),
-                radial-gradient(circle at 85% 20%, rgba(14, 165, 233, 0.08), transparent 30%),
-                #0b1120;
-    color: #cbd5e1;
+.premium-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
 }
 
+/* Lenis smooth scroll — when active, native scroll-behavior is forced off so
+   the two don't double-smooth; reduced-motion never mounts Lenis at all. */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
 
 .sticky-top {
     position: sticky;
     top: 0;
     z-index: 100;
-    background-color: #0b1120;
+    background-color: var(--bg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ambient motion library. Transform/opacity only (GPU-compositable, no layout
+   shift). Every keyframe's 0% is the resting/visible state, so the global
+   prefers-reduced-motion block (which forces animations to run once, instantly)
+   freezes each at a calm, fully-legible pose. No JS needed for these.
+   ───────────────────────────────────────────────────────────────────────── */
+@keyframes bgDriftA {
+    0%   { transform: translate3d(0, 0, 0); }
+    50%  { transform: translate3d(-26px, -18px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+}
+@keyframes bgDriftB {
+    0%   { transform: translate3d(0, 0, 0); }
+    50%  { transform: translate3d(22px, 14px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+}
+@keyframes twinkle {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+}
+@keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-7px); }
+}
+@keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+@keyframes spinSlowRev {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+}
+/* Opacity-only so the blurred halo rasterizes once (no per-frame re-raster). */
+@keyframes haloPulse {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 0.8; }
+}
+@keyframes drawIn {
+    from { stroke-dashoffset: var(--dash, 80); }
+    to   { stroke-dashoffset: 0; }
+}
+
+/* Background layers — slow parallax drift at two depths/speeds. */
+.bg-drift-a { animation: bgDriftA 34s ease-in-out infinite; will-change: transform; }
+.bg-drift-b { animation: bgDriftB 26s ease-in-out infinite; will-change: transform; }
+
+/* Cursor-reactive gold light — a fixed soft radial that the rAF loop translates
+   to the pointer (transform only → GPU, no repaint). Screen-blends so it lifts
+   the faint najmeh lines it passes over, giving the pattern "soul". Only mounted
+   on true-mouse devices (AmbientBackground gates it); it sits behind content so
+   it never touches text contrast. */
+.bg-cursor-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 520px;
+    height: 520px;
+    margin: -260px 0 0 -260px;
+    border-radius: 9999px;
+    pointer-events: none;
+    background: radial-gradient(
+        circle,
+        rgba(201, 162, 39, 0.09) 0%,
+        rgba(201, 162, 39, 0.04) 30%,
+        transparent 66%
+    );
+    mix-blend-mode: screen;
+    will-change: transform;
+    transform: translate3d(50vw, 50vh, 0);
+    contain: strict;
+}
+
+/* Mobile touch glow — soft gold light at the finger (decorative; pointer-
+   events:none). Translated via the shared rAF; NORMAL compositing (no blend)
+   so it adds no per-frame blend cost to touch-scroll on mobile GPUs. Opacity
+   eases in on touch, out on lift. */
+.touch-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 360px;
+    height: 360px;
+    margin: -180px 0 0 -180px;
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: 30;
+    opacity: 0;
+    background: radial-gradient(
+        circle,
+        rgba(201, 162, 39, 0.18) 0%,
+        rgba(201, 162, 39, 0.07) 34%,
+        transparent 66%
+    );
+    will-change: transform, opacity;
+    contain: strict;
+}
+
+/* Background glyph motifs — each can carry its own life. */
+.glyph-twinkle { animation: twinkle var(--dur, 5s) ease-in-out infinite; animation-delay: var(--d, 0s); }
+.glyph-float   { animation: floaty var(--dur, 7s) ease-in-out infinite; animation-delay: var(--d, 0s); }
+.glyph-spin    { animation: spinSlow var(--dur, 40s) linear infinite; transform-box: fill-box; transform-origin: center; }
+
+/* Portrait orbit ring — the framework logos circle the photo and stay upright. */
+.orbit-ring  { animation: spinSlow 32s linear infinite; will-change: transform; }
+.orbit-upright { animation: spinSlowRev 32s linear infinite; }
+
+/* Soft luminous halo (its OWN blurred layer so we pulse opacity, never an
+   expensive box-shadow on every frame). */
+.halo-pulse { animation: haloPulse 6s ease-in-out infinite; will-change: opacity, transform; }
+
+/* Off-screen pause (set by IntersectionObserver, e.g. the portrait cluster when
+   it scrolls out of view): freeze continuous animations so they composite no
+   frames, and release their promoted GPU layers. Identical look on re-entry. */
+.anim-paused,
+.anim-paused * {
+    animation-play-state: paused !important;
+    will-change: auto !important;
+}
+
+/* Hover-glow helper: lift + warm halo on interactive surfaces. */
+.glow-hover {
+    transition: box-shadow var(--dur-base) var(--ease-out),
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+    .glow-hover:hover { box-shadow: var(--tw-shadow, 0 18px 72px -22px rgba(201,162,39,0.5)); }
 }
