@@ -96,7 +96,7 @@ const RightBanner = () => {
               centering and the logos circle the portrait's true center. On phones
               the ring is tucked tighter to the (smaller) portrait so the logos
               don't hug the screen edges or crowd the text above; md+ unchanged. */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[116%] h-[116%] md:w-[124%] md:h-[124%]">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] md:w-[124%] md:h-[124%]">
           <div className="orbit-ring relative w-full h-full">
             {ORBIT.map(({ Icon, label, style, dur, d }) => (
               <span

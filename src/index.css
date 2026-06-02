@@ -529,6 +529,15 @@ html.lenis body {
 .orbit-ring  { animation: spinSlow 32s linear infinite; will-change: transform; }
 .orbit-upright { animation: spinSlowRev 32s linear infinite; }
 
+/* Mobile (< md): drop the per-logo independent float so the orbit logos sit at
+   a single, consistent radius — an even, symmetric ring with a clear gap —
+   instead of each bobbing ±7px (which made the tight mobile ring look uneven
+   and let logos dip onto the portrait). The ring spin + whole-cluster float
+   still animate, so it stays alive. Desktop (md+) keeps the per-logo float. */
+@media (max-width: 666px) {
+    .orbit-ring .glyph-float { animation: none; }
+}
+
 /* Soft luminous halo (its OWN blurred layer so we pulse opacity, never an
    expensive box-shadow on every frame). */
 .halo-pulse { animation: haloPulse 6s ease-in-out infinite; will-change: opacity, transform; }
