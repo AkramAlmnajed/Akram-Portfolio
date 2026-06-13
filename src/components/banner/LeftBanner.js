@@ -20,7 +20,7 @@ const LeftBanner = () => {
   const [titleIndex, setTitleIndex] = useState(0);
   const reduce = useReducedMotion();
   const resumePdfUrl =
-    "https://drive.google.com/file/d/1QOX6hhdDhCQu-T73rdr5616WpQkt-7GQ/view?usp=sharing";
+    "https://drive.google.com/file/d/19H4Yas0WE_jOiIPzPXT8S-1SJnWVK5M2/view?usp=sharing";
 
   useEffect(() => {
     const interval = setInterval(() => {
