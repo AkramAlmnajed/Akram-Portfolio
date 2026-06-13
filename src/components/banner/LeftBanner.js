@@ -19,8 +19,10 @@ const EASE = [0.16, 1, 0.3, 1];
 const LeftBanner = () => {
   const [titleIndex, setTitleIndex] = useState(0);
   const reduce = useReducedMotion();
-  const resumePdfUrl =
+  const resumeEnPdfUrl =
     "https://drive.google.com/file/d/1OpByZ8IiTcgP_ujJ-3wSxUexp3Z7g5v4/view?usp=sharing";
+  const resumeArPdfUrl =
+    "https://drive.google.com/file/d/1HV34_7ykLHs1JSqY_gCxuPsxJ38BCQ34/view?usp=sharing";
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,8 +31,8 @@ const LeftBanner = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleResumeOpen = () => {
-    window.open(resumePdfUrl, "_blank", "noopener,noreferrer");
+  const handleResumeOpen = (url) => {
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -153,11 +155,21 @@ const LeftBanner = () => {
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={handleResumeOpen}
-              aria-label="Open resume PDF"
-              className="bannerIcon"
+              onClick={() => handleResumeOpen(resumeEnPdfUrl)}
+              aria-label="Open English resume PDF"
+              className="goldHover inline-flex items-center gap-2 h-12 px-4 rounded-control border border-line bg-surface text-inkMuted hover:text-ink text-sm font-monoFont tracking-[0.1em] transition-[color,transform,box-shadow] duration-base ease-out hover:-translate-y-0.5 active:scale-[0.97]"
             >
-              <FaFileAlt />
+              <FaFileAlt className="pointer-events-none" />
+              Resume (EN)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleResumeOpen(resumeArPdfUrl)}
+              aria-label="Open Arabic resume PDF"
+              className="goldHover inline-flex items-center gap-2 h-12 px-4 rounded-control border border-line bg-surface text-inkMuted hover:text-ink text-sm font-monoFont tracking-[0.1em] transition-[color,transform,box-shadow] duration-base ease-out hover:-translate-y-0.5 active:scale-[0.97]"
+            >
+              <FaFileAlt className="pointer-events-none" />
+              Resume (AR)
             </button>
           </div>
         </div>
