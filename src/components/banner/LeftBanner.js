@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { FaGithub, FaLinkedinIn, FaFileAlt } from "react-icons/fa";
+import { FaGithub, FaLinkedinIn, FaFileAlt, FaArrowRight } from "react-icons/fa";
 import {
   SiTailwindcss,
   SiNextdotjs,
@@ -30,10 +30,6 @@ const LeftBanner = () => {
     }, 4000); // 4 seconds per word
     return () => clearInterval(interval);
   }, []);
-
-  const handleResumeOpen = (url) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
 
   return (
     <div className="w-full lgl:w-[56%] flex flex-col gap-10">
@@ -152,25 +148,39 @@ const LeftBanner = () => {
           <p className="font-monoFont text-mono uppercase tracking-[0.2em] text-inkMuted mb-4">
             My Resume
           </p>
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => handleResumeOpen(resumeEnPdfUrl)}
-              aria-label="Open English resume PDF"
-              className="goldHover inline-flex items-center gap-2 h-12 px-4 rounded-control border border-line bg-surface text-inkMuted hover:text-ink text-sm font-monoFont tracking-[0.1em] transition-[color,transform,box-shadow] duration-base ease-out hover:-translate-y-0.5 active:scale-[0.97]"
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={resumeEnPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open English resume (PDF, opens in a new tab)"
+              className="resumeBtn group"
             >
-              <FaFileAlt className="pointer-events-none" />
-              Resume (EN)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleResumeOpen(resumeArPdfUrl)}
-              aria-label="Open Arabic resume PDF"
-              className="goldHover inline-flex items-center gap-2 h-12 px-4 rounded-control border border-line bg-surface text-inkMuted hover:text-ink text-sm font-monoFont tracking-[0.1em] transition-[color,transform,box-shadow] duration-base ease-out hover:-translate-y-0.5 active:scale-[0.97]"
+              <FaFileAlt className="text-base text-inkMuted transition-colors duration-base ease-out group-hover:text-accent group-focus-visible:text-accent" />
+              <span className="font-monoFont text-sm tracking-[0.06em]">
+                Resume
+              </span>
+              <span className="inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded-hairline border border-line px-1.5 font-monoFont text-[0.7rem] leading-none tracking-[0.14em] text-accent transition-colors duration-base ease-out group-hover:border-accent group-hover:bg-accent group-hover:text-accentText group-focus-visible:border-accent group-focus-visible:bg-accent group-focus-visible:text-accentText">
+                EN
+              </span>
+              <FaArrowRight className="text-xs text-inkSubtle transition-[color,transform] duration-base ease-out group-hover:translate-x-0.5 group-hover:text-accent group-focus-visible:translate-x-0.5 group-focus-visible:text-accent" />
+            </a>
+            <a
+              href={resumeArPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open Arabic resume (PDF, opens in a new tab)"
+              className="resumeBtn group"
             >
-              <FaFileAlt className="pointer-events-none" />
-              Resume (AR)
-            </button>
+              <FaFileAlt className="text-base text-inkMuted transition-colors duration-base ease-out group-hover:text-accent group-focus-visible:text-accent" />
+              <span className="font-monoFont text-sm tracking-[0.06em]">
+                Resume
+              </span>
+              <span className="inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded-hairline border border-line px-1.5 font-monoFont text-[0.7rem] leading-none tracking-[0.14em] text-accent transition-colors duration-base ease-out group-hover:border-accent group-hover:bg-accent group-hover:text-accentText group-focus-visible:border-accent group-focus-visible:bg-accent group-focus-visible:text-accentText">
+                AR
+              </span>
+              <FaArrowRight className="text-xs text-inkSubtle transition-[color,transform] duration-base ease-out group-hover:translate-x-0.5 group-hover:text-accent group-focus-visible:translate-x-0.5 group-focus-visible:text-accent" />
+            </a>
           </div>
         </div>
       </motion.div>

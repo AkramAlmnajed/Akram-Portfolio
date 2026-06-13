@@ -84,10 +84,10 @@
 }
 
 @layer components {
-    /* Icon buttons — faint hairline at rest; the gold-rise gradient (below)
-       blooms in on hover instead of the old gold-bordered box. */
+    /* Icon buttons — faint hairline at rest; on hover they share the resume
+       buttons' champagne wipe + accent border + lift + glow (defined below). */
     .bannerIcon {
-        @apply relative overflow-hidden w-12 h-12 bg-surface text-inkMuted text-xl inline-flex items-center justify-center rounded-control border border-line transition-[color,transform,box-shadow] duration-base ease-out hover:text-ink hover:-translate-y-0.5 active:scale-[0.97] active:translate-y-0;
+        @apply relative isolate overflow-hidden w-12 h-12 bg-surface text-inkMuted text-xl inline-flex items-center justify-center rounded-control border border-line transition-[color,border-color,transform,box-shadow] duration-base ease-out active:scale-[0.97] active:translate-y-0;
     }
     .resumeLi {
         @apply relative overflow-hidden w-full h-16 bg-surface text-lg text-inkMuted flex justify-center cursor-pointer hover:text-ink transition-colors duration-base items-center border border-line rounded-control;
@@ -184,14 +184,12 @@
    painting under the content and over the page behind.
    ───────────────────────────────────────────────────────────────────────── */
 .goldHover,
-.bannerIcon,
 .resumeLi {
     position: relative;
     isolation: isolate;
     transition: box-shadow var(--dur-base) var(--ease-out);
 }
 .goldHover::before,
-.bannerIcon::before,
 .resumeLi::before {
     content: "";
     position: absolute;
@@ -210,26 +208,75 @@
 }
 @media (hover: hover) and (pointer: fine) {
     .goldHover:hover::before,
-    .bannerIcon:hover::before,
     .resumeLi:hover::before {
         opacity: 1;
     }
     .goldHover:hover,
-    .bannerIcon:hover,
     .resumeLi:hover {
         box-shadow: 0 6px 30px -10px rgba(201, 162, 39, 0.35);
     }
 }
 .goldHover:focus-visible::before,
 .goldHover:focus-within::before,
-.bannerIcon:focus-visible::before,
 .resumeLi:focus-visible::before {
     opacity: 1;
 }
 .goldHover:focus-visible,
-.bannerIcon:focus-visible,
 .resumeLi:focus-visible {
     box-shadow: 0 6px 30px -10px rgba(201, 162, 39, 0.35);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Resume / CV buttons — the banner's primary action, so a touch louder than the
+   icon buttons. A refined pill: document glyph, label, a champagne language chip
+   (EN / AR) that inverts to solid gold, and an arrow that nudges right. A soft
+   gold wipe sweeps in from the left BEHIND the content (background only, never on
+   text) on hover/focus, with the house lift + glow. Reduced-motion users still
+   get the colour shift; the wipe and nudge simply land instantly.
+   ───────────────────────────────────────────────────────────────────────── */
+.resumeBtn {
+    @apply relative isolate inline-flex items-center gap-2.5 h-12 pl-4 pr-3 rounded-control border border-line bg-surface text-inkMuted transition-[color,border-color,transform,box-shadow] duration-base ease-out;
+}
+.resumeBtn::before,
+.bannerIcon::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        rgba(201, 162, 39, 0.20) 0%,
+        rgba(201, 162, 39, 0.07) 58%,
+        transparent 100%
+    );
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+    transition: transform var(--dur-base) var(--ease-out),
+        opacity var(--dur-base) var(--ease-out);
+    pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+    .resumeBtn:hover,
+    .bannerIcon:hover {
+        @apply text-ink border-accentDim -translate-y-0.5;
+        box-shadow: 0 10px 36px -12px rgba(201, 162, 39, 0.5);
+    }
+    .resumeBtn:hover::before,
+    .bannerIcon:hover::before {
+        transform: scaleX(1);
+        opacity: 1;
+    }
+}
+.resumeBtn:focus-visible,
+.bannerIcon:focus-visible {
+    @apply text-ink border-accentDim;
+}
+.resumeBtn:focus-visible::before,
+.bannerIcon:focus-visible::before {
+    transform: scaleX(1);
+    opacity: 1;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
