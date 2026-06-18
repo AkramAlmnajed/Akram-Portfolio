@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Akram-Portfolio/static/css/main.e76be1c6.css",
-    "main.js": "/Akram-Portfolio/static/js/main.d55efbdd.js",
+    "main.css": "/Akram-Portfolio/static/css/main.f4405fe8.css",
+    "main.js": "/Akram-Portfolio/static/js/main.07450979.js",
     "static/media/bannerImg.png": "/Akram-Portfolio/static/media/bannerImg.62f787b0a2e8a494413e.png",
     "static/media/projectTwo.jpg": "/Akram-Portfolio/static/media/projectTwo.f0fb61283e4826a25152.jpg",
     "static/media/damas.svg": "/Akram-Portfolio/static/media/damas.e8259797cef79cb24faf36ea94454ce0.svg",
@@ -9,12 +9,10 @@
     "static/media/projectThree.jpg": "/Akram-Portfolio/static/media/projectThree.f00ee5fad04be7a2a7f7.jpg",
     "static/media/projectOne.jpg": "/Akram-Portfolio/static/media/projectOne.ca3b37386e650873044f.jpg",
     "static/media/contactImg.png": "/Akram-Portfolio/static/media/contactImg.8ddfbfd11798f881db54.png",
-    "index.html": "/Akram-Portfolio/index.html",
-    "main.e76be1c6.css.map": "/Akram-Portfolio/static/css/main.e76be1c6.css.map",
-    "main.d55efbdd.js.map": "/Akram-Portfolio/static/js/main.d55efbdd.js.map"
+    "index.html": "/Akram-Portfolio/index.html"
   },
   "entrypoints": [
-    "static/css/main.e76be1c6.css",
-    "static/js/main.d55efbdd.js"
+    "static/css/main.f4405fe8.css",
+    "static/js/main.07450979.js"
   ]
 }
