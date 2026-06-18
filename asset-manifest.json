@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Akram-Portfolio/static/css/main.1b5584ca.css",
-    "main.js": "/Akram-Portfolio/static/js/main.ee23da9e.js",
+    "main.css": "/Akram-Portfolio/static/css/main.6a2b20bb.css",
+    "main.js": "/Akram-Portfolio/static/js/main.f44f42a3.js",
     "static/media/bannerImg.png": "/Akram-Portfolio/static/media/bannerImg.62f787b0a2e8a494413e.png",
     "static/media/projectTwo.jpg": "/Akram-Portfolio/static/media/projectTwo.f0fb61283e4826a25152.jpg",
     "static/media/damas.svg": "/Akram-Portfolio/static/media/damas.e8259797cef79cb24faf36ea94454ce0.svg",
@@ -12,7 +12,7 @@
     "index.html": "/Akram-Portfolio/index.html"
   },
   "entrypoints": [
-    "static/css/main.1b5584ca.css",
-    "static/js/main.ee23da9e.js"
+    "static/css/main.6a2b20bb.css",
+    "static/js/main.f44f42a3.js"
   ]
 }
