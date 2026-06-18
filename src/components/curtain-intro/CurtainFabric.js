@@ -41,7 +41,7 @@ export default function CurtainFabric({ onClose }) {
       <Canvas
         className="curtain-canvas"
         flat
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         gl={{ alpha: true, antialias: true }}
         camera={{ position: [0, 0, CAMERA_Z], fov: CAMERA_FOV }}
         onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}

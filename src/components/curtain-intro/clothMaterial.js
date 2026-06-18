@@ -30,7 +30,6 @@ const RIM_COLOR = '#FFF6E6';
 const VIGNETTE_STRENGTH = 0.35; // dark edge falloff (atmosphere, not a spotlight)
 const VIGNETTE_INNER = 0.25; // distance from center where darkening begins
 const VIGNETTE_OUTER = 0.78; // distance of full darkening
-const GRAIN_STRENGTH = 0.05; // fine film-grain amplitude (~5% peak-to-peak)
 
 // Meso wrinkle normal (low frequency, layered under the micro weave).
 const WRINKLE_NORMAL_AMP = 0.25;
@@ -203,7 +202,6 @@ export function createClothMaterial(gl) {
 
     shader.fragmentShader =
       'uniform sampler2D mesoNormalMap;\nuniform vec2 uMesoRepeat;\nuniform float uMesoAmp;\nuniform float uRimStrength;\nuniform vec3 uRimColor;\nuniform float uRoughVar;\nuniform float uTime;\nuniform vec2 uResolution;\nvarying float vShade;\nvarying vec2 vClothUv;\n' +
-      'float clothGrain( vec2 p ) { return fract( sin( dot( p, vec2( 12.9898, 78.233 ) ) ) * 43758.5453123 ); }\n' +
       shader.fragmentShader
         // Weave-tied roughness shimmer (alpha of the micro map).
         .replace(
@@ -240,7 +238,6 @@ export function createClothMaterial(gl) {
             '#include <colorspace_fragment>',
             '\tvec2 clothScreenUv = gl_FragCoord.xy / uResolution;',
             `\tgl_FragColor.rgb *= 1.0 - ${VIGNETTE_STRENGTH.toFixed(3)} * smoothstep( ${VIGNETTE_INNER.toFixed(3)}, ${VIGNETTE_OUTER.toFixed(3)}, distance( clothScreenUv, vec2( 0.5 ) ) );`,
-            `\tgl_FragColor.rgb += ( clothGrain( gl_FragCoord.xy + uTime * 13.0 ) - 0.5 ) * ${GRAIN_STRENGTH.toFixed(3)};`,
           ].join('\n'),
         );
   };

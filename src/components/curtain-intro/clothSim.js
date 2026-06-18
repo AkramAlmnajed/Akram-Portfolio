@@ -8,8 +8,8 @@
  * gathering the pins inward. The grid settles to a draped pose at construction.
  */
 
-export const GRID_W = 60; // particles across (watch FPS: back this off FIRST if it dips)
-export const GRID_H = 84; // particles down
+export const GRID_W = 44; // particles across (watch FPS: back this off FIRST if it dips)
+export const GRID_H = 62; // particles down
 export const FILL_W = 1.35; // oversize vs viewport so folds/billow never expose an edge
 export const FILL_H = 1.25;
 export const FIXED_DT = 1 / 60; // fixed simulation timestep
@@ -23,7 +23,7 @@ const GRAVITY = 6.0; // world units / s^2, pulling -Y
 const DAMPING = 0.985; // Verlet velocity retention — underdamped so it flutters, then settles
 const MAX_VEL = 0.3; // per-step displacement clamp (stability; a touch higher for forceful shoves)
 const MAX_VEL_OPEN = 1.5; // raised clamp during the open lift so the cloth flies up coherently
-const STIFFNESS_ITERS = 14; // constraint relaxation passes per step
+const STIFFNESS_ITERS = 10; // constraint relaxation passes per step (lowered for FPS; folds still hold)
 const STRUCTURAL_STIFFNESS = 1.0;
 const BEND_STIFFNESS = 0.2; // skip-one constraints kept soft so folds stay pronounced
 

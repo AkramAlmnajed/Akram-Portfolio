@@ -24,7 +24,7 @@ const GUST_ATTACK = 0.4; // gust rises quickly...
 const GUST_DECAY = 0.06; // ...and eases back to rest when the pointer stops/leaves
 
 // Fixed-timestep driver guards (Lesson 7: a tab refocus must not explode the sim).
-const MAX_SUBSTEPS = 5;
+const MAX_SUBSTEPS = 3; // cap catch-up steps so a slow frame can't spiral into more sim work
 const MAX_FRAME = 0.1; // clamp huge deltas
 const MIN_DT = 1 / 120; // floor for pointer-velocity division
 
@@ -94,18 +94,28 @@ export default function CurtainCloth({ onReady, opening }) {
   useEffect(() => () => disposeClothMaterial(material), [material]);
   useEffect(() => () => geometry.dispose(), [geometry]);
 
-  // Track the pointer in NDC (StrictMode-safe: the cleanup removes the single listener).
+  // Track the pointer in NDC. The canvas rect is cached and refreshed only on resize — reading
+  // getBoundingClientRect on every pointermove forces a synchronous layout of the whole page behind
+  // the curtain, which was the cause of the frame drops while hovering. (StrictMode-safe: cleanup
+  // removes both listeners.)
   useEffect(() => {
     const el = gl.domElement;
+    let rect = el.getBoundingClientRect();
+    const refreshRect = () => {
+      rect = el.getBoundingClientRect();
+    };
     const onMove = (e) => {
-      const r = el.getBoundingClientRect();
       wind.ndc.set(
-        ((e.clientX - r.left) / r.width) * 2 - 1,
-        -((e.clientY - r.top) / r.height) * 2 + 1,
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1,
       );
     };
     window.addEventListener('pointermove', onMove, { passive: true });
-    return () => window.removeEventListener('pointermove', onMove);
+    window.addEventListener('resize', refreshRect, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('resize', refreshRect);
+    };
   }, [gl, wind]);
 
   useFrame((state, delta) => {
