@@ -8,6 +8,34 @@ import ProjectsCard from "./ProjectsCard";
 // external/visit glyph for live sites, so the affordance always matches the URL.
 const projectsData = [
   {
+    title: "Shahek — Mobile App (React Native)",
+    des: "Cross-platform mobile app built with React Native (Expo) and TypeScript — real-time chat over WebSockets, AI image generation, and Laravel REST API integration, shipped from Figma design to a published release.",
+    githubLink: "https://github.com/AkramAlmnajed/shahek-mobile-ReactNative",
+    tags: ["React Native", "Expo", "TypeScript", "WebSockets"],
+    visibility: "Professional Project",
+  },
+  {
+    title: "Shahek — Admin Dashboard (React.js)",
+    des: "Management dashboard built with React.js, TypeScript, and Vite, consuming the Laravel REST API — role-based views, real-time chat, a feedback system, and day-to-day operational workflows.",
+    githubLink: "https://dashboard.shahek.org/auth",
+    tags: ["React.js", "TypeScript", "Vite", "Role-Based Views"],
+    visibility: "Professional Project",
+  },
+  {
+    title: "Shahek — Backend / REST API (Laravel)",
+    des: "RESTful API built with Laravel (PHP) — versioned endpoints, email-OTP authentication, real-time chat via Laravel Reverb (WebSockets), generative-AI image integration, and Docker-based CI/CD deployment.",
+    githubLink: "https://github.com/AkramAlmnajed/shahek-backend-Laravel",
+    tags: ["Laravel", "PHP", "Laravel Reverb", "Docker / CI/CD"],
+    visibility: "Professional Project",
+  },
+  {
+    title: "Shahek — Company Website (WordPress)",
+    des: "Company website on WordPress (PHP) — ongoing development and security hardening against fraud and phishing.",
+    githubLink: "https://shahek.org/",
+    tags: ["WordPress", "PHP", "Security Hardening"],
+    visibility: "Professional Project",
+  },
+  {
     title: "Thiqa Education Platform",
     des: "Contributing to Version 1 of an online school platform at Thiqa Education. Focused on scalable React.js and TypeScript interfaces integrated with Express.js and Odoo services.",
     githubLink: "https://tutor-portal.thiqaeducation.com/login",

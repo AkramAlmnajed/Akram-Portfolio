@@ -4,6 +4,18 @@ import ResumeCard from "./ResumeCard";
 
 const experienceData = [
   {
+    title: "Full-Stack Developer",
+    company: "Shahek",
+    period: "Dec 2025 - Present",
+    employmentType: "Full-time, On-site",
+    location: "Damascus, Syria",
+    highlights: [
+      "Delivered a full-stack product end to end across versions 1 and 2 (~6 months) — a React Native mobile app, a React.js dashboard, and a Laravel (PHP) REST API — from Figma design to production.",
+      "Containerized the stack with Docker and built a CI/CD pipeline for automated builds and deployment, and integrated generative-AI image models with a real-time chat feature over WebSockets on a microservices architecture.",
+      "Diagnosed and resolved performance bottlenecks across the stack, cutting load times by ~45%; currently hardening the company's WordPress site against fraud and phishing and developing an AI chatbot.",
+    ],
+  },
+  {
     title: "Front-End Web Developer",
     company: "Thiqa Education",
     period: "Oct 2025 - Present",

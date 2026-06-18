@@ -1,0 +1,388 @@
+/*
+ * Curtain intro — self-contained styles. Every class is prefixed `.curtain-` so nothing
+ * leaks into Tailwind's global layer or collides with a utility class. Brand hex values are
+ * hardcoded here on purpose (decoupled from tailwind.config.js): fabric #1D1D22, ink #F1EFE9,
+ * gold #C9A227, deep ink #0E0E11. Layer order within the root: canvas -> drape -> welcome -> arrow.
+ */
+
+/* Cursor: no override here on purpose. The portfolio's custom cursor (its z-index is lifted
+ * above the curtain in index.css) shows through; the portfolio's global
+ * `.has-custom-cursor * { cursor: none }` hides the native arrow over the curtain, and the
+ * cursor ring's active state is the affordance over the arrow button. */
+
+/* Full-viewport overlay above <App/>. No background of its own — the transparent canvas lets
+ * the (opaque) cloth cover it. Captures pointer events so the curtain is modal. */
+.curtain-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+/* The transparent WebGL canvas fills the overlay (sits at the base of the stack). */
+.curtain-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Black-fabric drape: instant-paint placeholder + no-WebGL fallback. Above the canvas, below
+ * the welcome text. Fades out once the opaque WebGL cloth has painted. */
+.curtain-drape {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-color: #1D1D22;
+  background-image:
+    linear-gradient(180deg, rgba(201, 162, 39, 0.05), rgba(201, 162, 39, 0) 20%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(14, 14, 17, 0.55) 0px,
+      rgba(29, 29, 34, 0) 22px,
+      rgba(241, 239, 233, 0.02) 44px,
+      rgba(29, 29, 34, 0) 66px,
+      rgba(14, 14, 17, 0.55) 88px
+    );
+  transition: opacity 700ms ease;
+}
+
+.curtain-drape--hidden {
+  opacity: 0;
+}
+
+/* Centered welcome block. Pointer-transparent so the canvas keeps receiving pointer events.
+ * Moves up + fades during the open. */
+.curtain-welcome {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  pointer-events: none;
+  transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1), opacity 700ms ease;
+}
+
+.curtain-welcome--opening {
+  transform: translateY(-44px);
+  opacity: 0;
+}
+
+/* Stable-height stage for the rotating lines: lines are absolutely stacked over each other so
+ * they crossfade in place with NO layout jump. */
+.curtain-lines {
+  position: relative;
+  width: 100%;
+  max-width: 92vw;
+  min-height: 2.6em;
+  font-size: clamp(1.6rem, 4.5vw, 3.6rem);
+}
+
+/* One welcome line. Idle = below + faded + blurred; active = centered + sharp; leave = up. */
+.curtain-line {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(4px);
+  transition:
+    opacity 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.curtain-line--active {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.curtain-line--leave {
+  opacity: 0;
+  transform: translateY(-12px);
+  filter: blur(4px);
+}
+
+/* The metallic gradient (set inline per line) is clipped to the text; a near-white warm sheen
+ * band sweeps across (~5s); drop-shadows give ink depth so any palette lifts off the cloth. */
+.curtain-line-text {
+  margin: 0;
+  max-width: 100%;
+  font-family: 'Cormorant Garamond', Cormorant, Georgia, serif;
+  font-size: 1em;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.035em;
+  text-align: center;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-size: 250% 100%, 100% 100%;
+  background-position: -140% 0, 0 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 1px 1px #0E0E11)
+    drop-shadow(0 3px 8px rgba(14, 14, 17, 0.55))
+    drop-shadow(0 0 16px rgba(201, 162, 39, 0.18));
+  animation: curtain-sheen 6s ease-in-out infinite;
+}
+
+@keyframes curtain-sheen {
+  0% {
+    background-position: -140% 0, 0 0;
+  }
+  45%,
+  100% {
+    background-position: 240% 0, 0 0;
+  }
+}
+
+/* Gold "enter" affordance (chevron chip + caption) at bottom-center. Tunables are the custom
+ * properties below. The button owns the hover lift + open transform; the inner wrapper owns the
+ * resting bob so they compose without fighting; the chip owns the glow/ring/spark. */
+.curtain-arrow {
+  --arrow-hover-ms: 250ms;
+  --arrow-hover-scale: 1.12;
+  --arrow-hover-rise: 4px;
+  --arrow-ring-ms: 1600ms;
+  --arrow-spark-ms: 500ms;
+  --arrow-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --arrow-glow-hover: 0 0 22px rgba(201, 162, 39, 0.55);
+
+  position: absolute;
+  left: 50%;
+  bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  transform-origin: center bottom;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #C9A227;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    transform var(--arrow-hover-ms) var(--arrow-ease),
+    opacity var(--arrow-hover-ms) ease;
+}
+
+/* Hover/focus parity: lean toward the viewer (scale + rise). */
+.curtain-arrow:hover,
+.curtain-arrow:focus-visible {
+  transform: translateX(-50%) translateY(calc(var(--arrow-hover-rise) * -1))
+    scale(var(--arrow-hover-scale));
+}
+
+.curtain-arrow:focus-visible {
+  outline: none; /* the chip shows the focus ring so it hugs the circle */
+}
+
+.curtain-arrow--opening {
+  transform: translateX(-50%) translateY(-52px);
+  opacity: 0;
+  transition:
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 700ms ease;
+}
+
+/* Resting bob (breathe) — on the inner wrapper so the button's hover/open transforms compose.
+ * Holds the chevron + caption so they bob and lift as ONE unit (no drift). */
+.curtain-arrow-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  animation: curtain-bob 2.4s ease-in-out infinite;
+}
+
+/* Circular chevron chip — border + bg, the hover glow bloom, the ring pulse, the entry spark. */
+.curtain-arrow-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(201, 162, 39, 0.55);
+  border-radius: 9999px;
+  background: rgba(14, 14, 17, 0.35);
+  box-shadow: 0 0 0 rgba(201, 162, 39, 0);
+  transition:
+    box-shadow var(--arrow-hover-ms) ease,
+    border-color var(--arrow-hover-ms) ease,
+    background-color var(--arrow-hover-ms) ease;
+}
+
+.curtain-arrow:hover .curtain-arrow-chip,
+.curtain-arrow:focus-visible .curtain-arrow-chip {
+  border-color: rgba(201, 162, 39, 0.95);
+  background: rgba(14, 14, 17, 0.55);
+  box-shadow: var(--arrow-glow-hover);
+}
+
+.curtain-arrow:focus-visible .curtain-arrow-chip {
+  outline: 2px solid #C9A227;
+  outline-offset: 3px;
+}
+
+/* Entry spark — a quick warm-gold brighten on hover-enter (one pass). */
+.curtain-arrow-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 246, 214, 0.5), rgba(201, 162, 39, 0) 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+.curtain-arrow:hover .curtain-arrow-chip::before,
+.curtain-arrow:focus-visible .curtain-arrow-chip::before {
+  animation: curtain-arrow-spark var(--arrow-spark-ms) ease-out 1;
+}
+
+/* Expanding gold ring beacon (thin) — loops only while hovered/focused. */
+.curtain-arrow-chip::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  border: 1px solid rgba(201, 162, 39, 0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+.curtain-arrow:hover .curtain-arrow-chip::after,
+.curtain-arrow:focus-visible .curtain-arrow-chip::after {
+  animation: curtain-arrow-ring var(--arrow-ring-ms) ease-out infinite;
+}
+
+/* Chevron: slow breathing gold halo (drop-shadow pulses between soft & bright). */
+.curtain-arrow-chevron {
+  display: block;
+  filter: drop-shadow(0 0 3px rgba(201, 162, 39, 0.45));
+  animation: curtain-arrow-glow 2s ease-in-out infinite;
+}
+
+/* Caption — Cormorant Garamond, muted gold, tracked uppercase; subordinate to the chevron.
+ * Shares the hover treatment (brighten + tracking eases open), in sync via the same timing. */
+.curtain-arrow-caption {
+  font-family: 'Cormorant Garamond', Cormorant, Georgia, serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(201, 162, 39, 0.7);
+  white-space: nowrap;
+  transition:
+    color var(--arrow-hover-ms) ease,
+    letter-spacing var(--arrow-hover-ms) var(--arrow-ease);
+}
+.curtain-arrow:hover .curtain-arrow-caption,
+.curtain-arrow:focus-visible .curtain-arrow-caption {
+  color: rgba(201, 162, 39, 0.95);
+  letter-spacing: 0.26em;
+}
+
+@keyframes curtain-bob {
+  0%,
+  100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes curtain-arrow-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(201, 162, 39, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 9px rgba(201, 162, 39, 0.9));
+  }
+}
+
+@keyframes curtain-arrow-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes curtain-arrow-spark {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Reduced-motion: opacity-only line crossfade (no slide/blur), no sheen sweep; arrow keeps no
+ * bob/breathe/scale/ring/spark — just a static brightness + glow bump on hover so it still reads
+ * as interactive. The base chevron filter remains as a soft static glow. */
+@media (prefers-reduced-motion: reduce) {
+  .curtain-line {
+    transform: none;
+    filter: none;
+    transition: opacity 700ms ease;
+  }
+  .curtain-line--active {
+    transform: none;
+  }
+  .curtain-line--leave {
+    transform: none;
+    filter: none;
+  }
+  .curtain-line-text {
+    animation: none;
+  }
+
+  .curtain-arrow-inner {
+    animation: none;
+  }
+  .curtain-arrow-chevron {
+    animation: none;
+  }
+  .curtain-arrow:hover,
+  .curtain-arrow:focus-visible {
+    transform: translateX(-50%);
+  }
+  .curtain-arrow:hover .curtain-arrow-chip,
+  .curtain-arrow:focus-visible .curtain-arrow-chip {
+    box-shadow: 0 0 14px rgba(201, 162, 39, 0.5);
+  }
+  .curtain-arrow:hover .curtain-arrow-chip::before,
+  .curtain-arrow:focus-visible .curtain-arrow-chip::before,
+  .curtain-arrow:hover .curtain-arrow-chip::after,
+  .curtain-arrow:focus-visible .curtain-arrow-chip::after {
+    animation: none;
+  }
+  .curtain-arrow:hover .curtain-arrow-caption,
+  .curtain-arrow:focus-visible .curtain-arrow-caption {
+    letter-spacing: 0.22em;
+  }
+}
