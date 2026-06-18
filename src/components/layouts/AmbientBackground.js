@@ -106,6 +106,11 @@ const AmbientBackground = () => {
     <div
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
       aria-hidden="true"
+      // Explicit dark bg + color-scheme on the pattern's OWN container so Samsung
+      // Internet's aggressive dark-mode re-coloring leaves the faint gold star
+      // pattern untouched. var(--bg) (#16161a) matches the <html> fill already
+      // painted behind this -z-10 layer, so iOS appearance is unchanged.
+      style={{ colorScheme: "dark", backgroundColor: "var(--bg)" }}
     >
       <div
         ref={fieldRef}

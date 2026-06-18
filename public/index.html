@@ -4,7 +4,12 @@
     <meta charset="utf-8" />
     <link rel="icon" type="image/jpeg" href="%PUBLIC_URL%/profilePhoto.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0E0E11" />
+    <!-- Declare the site as already-dark so Android Chrome / Samsung Internet skip
+         their automatic light->dark re-coloring (which mangled the faint gold star
+         pattern on Samsung dark mode). theme-color matches the real page bg (--bg). -->
+    <meta name="color-scheme" content="dark" />
+    <meta name="supported-color-schemes" content="dark" />
+    <meta name="theme-color" content="#16161A" />
     <meta
       name="description"
       content="Akram Al-Mnajed — Front-End Web Developer (React.js, Next.js, TypeScript). Selected work, experience, and contact."

@@ -4,6 +4,11 @@
 
 @layer base {
   :root {
+    /* Site is already dark — opt out of forced light->dark re-coloring on
+       Android Chrome / Samsung Internet (which altered the faint gold star
+       pattern when the phone's dark mode was on). */
+    color-scheme: dark;
+
     /* Motion tokens — mechanical precision: snap into alignment, no float */
     --ease-out: cubic-bezier(0.2, 0, 0, 1);
     --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
@@ -45,6 +50,7 @@
     padding: 0;
     overflow-x: hidden;
     color: var(--ink);
+    color-scheme: dark; /* reinforce the dark opt-out on the document roots */
     font-family: "Manrope", system-ui, sans-serif;
   }
 
