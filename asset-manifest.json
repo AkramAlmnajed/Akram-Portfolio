@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Akram-Portfolio/static/css/main.dab2801f.css",
-    "main.js": "/Akram-Portfolio/static/js/main.dc690683.js",
+    "main.js": "/Akram-Portfolio/static/js/main.2bfb1ad9.js",
     "static/media/bannerImg.png": "/Akram-Portfolio/static/media/bannerImg.62f787b0a2e8a494413e.png",
     "static/media/projectTwo.jpg": "/Akram-Portfolio/static/media/projectTwo.f0fb61283e4826a25152.jpg",
     "static/media/damas.svg": "/Akram-Portfolio/static/media/damas.e8259797cef79cb24faf36ea94454ce0.svg",
@@ -13,6 +13,6 @@
   },
   "entrypoints": [
     "static/css/main.dab2801f.css",
-    "static/js/main.dc690683.js"
+    "static/js/main.2bfb1ad9.js"
   ]
 }
