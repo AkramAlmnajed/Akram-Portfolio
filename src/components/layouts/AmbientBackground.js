@@ -15,6 +15,7 @@ import {
 import damasPattern from "../../assets/images/damas.svg";
 import usePointer from "../../hooks/usePointer";
 import { useFinePointer } from "../../hooks/useMediaQuery";
+import useVisualViewportPin from "../../hooks/useVisualViewportPin";
 
 // Faint, LIVING "heritage-meets-stack" background. Behind all content,
 // pointer-events: none.
@@ -74,12 +75,19 @@ const Glyph = React.memo(({ Icon, x, y, s, k, dur, d }) => (
 ));
 
 const AmbientBackground = () => {
+  const rootRef = useRef(null);
   const fieldRef = useRef(null);
   const glowRef = useRef(null);
   // Eligible only on a true mouse (reactive). Touch / coarse / reduced-motion
   // get a calm STATIC pattern: no glow rendered, no listeners, no rAF.
   const interactive = useFinePointer();
   const parallax = useRef({ px: 0, py: 0, gx: 0, gy: 0, init: false });
+
+  // Pin this fixed layer to the visual viewport so mobile browser chrome (address
+  // bar / toolbar) sliding in/out can't drag or snap it — universal across engines.
+  // Inert on desktop (visualViewport.offsetTop stays 0; its events don't fire on a
+  // normal page scroll), so the fine-pointer render path is unchanged.
+  useVisualViewportPin(rootRef);
 
   // Parallax (field) + cursor glow via the SHARED idle-stopping pointer engine
   // (one listener, one rAF; a still mouse = zero frames). Transform-only.
@@ -104,13 +112,29 @@ const AmbientBackground = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      ref={rootRef}
+      className="pointer-events-none fixed inset-0 h-lvh -z-10 overflow-hidden"
       aria-hidden="true"
       // Explicit dark bg + color-scheme on the pattern's OWN container so Samsung
       // Internet's aggressive dark-mode re-coloring leaves the faint gold star
       // pattern untouched. var(--bg) (#16161a) matches the <html> fill already
       // painted behind this -z-10 layer, so iOS appearance is unchanged.
-      style={{ colorScheme: "dark", backgroundColor: "var(--bg)" }}
+      //
+      // PERMANENT compositor promotion (translateZ + backface-visibility + will-
+      // change) takes this fixed layer off the main relayout path so mobile browser
+      // chrome animating in/out can't drag/snap it — universal across engines.
+      // `inset-0 h-lvh` keeps it anchored top/left/right while pinning the height to
+      // the LARGE viewport (bottom is over-constrained → ignored, lvh height wins),
+      // so the % basis its glyphs/mask resolve against never changes with the
+      // chrome. useVisualViewportPin overwrites `transform` each chrome frame to
+      // translate by visualViewport.offsetTop; this inline value is the fallback.
+      style={{
+        colorScheme: "dark",
+        backgroundColor: "var(--bg)",
+        transform: "translateZ(0)",
+        backfaceVisibility: "hidden",
+        willChange: "transform",
+      }}
     >
       <div
         ref={fieldRef}

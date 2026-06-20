@@ -23,7 +23,7 @@ const GRAVITY = 6.0; // world units / s^2, pulling -Y
 const DAMPING = 0.985; // Verlet velocity retention — underdamped so it flutters, then settles
 const MAX_VEL = 0.3; // per-step displacement clamp (stability; a touch higher for forceful shoves)
 const MAX_VEL_OPEN = 1.5; // raised clamp during the open lift so the cloth flies up coherently
-const STIFFNESS_ITERS = 10; // constraint relaxation passes per step (lowered for FPS; folds still hold)
+export const STIFFNESS_ITERS = 10; // DEFAULT constraint relaxation passes per step (per-tier override via ctor; folds still hold)
 const STRUCTURAL_STIFFNESS = 1.0;
 const BEND_STIFFNESS = 0.2; // skip-one constraints kept soft so folds stay pronounced
 
@@ -50,9 +50,11 @@ const SETTLE_STEPS = 80;
 
 export class ClothSim {
   // positionArray is the geometry's position attribute (flat grid) — mutated in place.
-  constructor(positionArray, cols, rows) {
+  // `iters` (constraint passes/step) is tier-tunable: fewer on weaker devices.
+  constructor(positionArray, cols, rows, iters = STIFFNESS_ITERS) {
     this.cols = cols;
     this.rows = rows;
+    this.iters = iters;
     this.count = cols * rows;
     this.pos = positionArray;
     this.prev = new Float32Array(positionArray); // copy => zero initial velocity
@@ -65,6 +67,7 @@ export class ClothSim {
     this.windI = 0; // gust intensity (0 at rest)
     this.windDirX = 0;
     this.windDirY = 0;
+    this.windRadius = WIND_RADIUS; // gust reach; widened for touch (set per frame by CurtainCloth)
     this.opening = false; // during the open lift the velocity clamp is raised
 
     // Pin the full top row.
@@ -176,7 +179,7 @@ export class ClothSim {
       if (this.windI > 1e-4) {
         const ddx = cx - this.windX;
         const ddy = cy - this.windY;
-        const r2 = WIND_RADIUS * WIND_RADIUS;
+        const r2 = this.windRadius * this.windRadius;
         const d2 = ddx * ddx + ddy * ddy;
         if (d2 < r2) {
           let fall = 1 - d2 / r2;
@@ -215,7 +218,7 @@ export class ClothSim {
 
   _solve() {
     const { pos, pinned, cA, cB, cRest, cStiff, cCount } = this;
-    for (let it = 0; it < STIFFNESS_ITERS; it += 1) {
+    for (let it = 0; it < this.iters; it += 1) {
       for (let c = 0; c < cCount; c += 1) {
         const a = cA[c];
         const b = cB[c];

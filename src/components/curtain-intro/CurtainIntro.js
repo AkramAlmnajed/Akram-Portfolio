@@ -45,17 +45,24 @@ export default function CurtainIntro() {
     const body = document.body;
     const prevHtmlOverflow = html.style.overflow;
     const prevBodyOverflow = body.style.overflow;
+    // Modal on ALL devices: lock page scroll so nothing moves behind the curtain (the page can't
+    // scroll, and there is no pull-to-refresh — by design; the curtain owns the gesture).
     html.style.overflow = 'hidden';
     body.style.overflow = 'hidden';
 
-    const blockWheel = (event) => {
+    const blockScroll = (event) => {
       event.preventDefault();
       event.stopImmediatePropagation();
     };
-    window.addEventListener('wheel', blockWheel, { capture: true, passive: false });
+    // Swallow the wheel (desktop) AND touchmove (mobile) in the capture phase so a finger drag on
+    // the cloth — or anywhere — can't scroll / zoom / pull-to-refresh / rubber-band the page while
+    // the curtain is up. The cloth grab itself runs on Pointer Events, which still fire.
+    window.addEventListener('wheel', blockScroll, { capture: true, passive: false });
+    window.addEventListener('touchmove', blockScroll, { capture: true, passive: false });
 
     return () => {
-      window.removeEventListener('wheel', blockWheel, { capture: true });
+      window.removeEventListener('wheel', blockScroll, { capture: true });
+      window.removeEventListener('touchmove', blockScroll, { capture: true });
       html.style.overflow = prevHtmlOverflow;
       body.style.overflow = prevBodyOverflow;
     };

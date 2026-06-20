@@ -163,7 +163,9 @@ function finishTexture(gl, data, size, repeatX, repeatY) {
 }
 
 // Build the patched MeshPhysicalMaterial. Disposables are stashed on userData.
-export function createClothMaterial(gl) {
+// `post` toggles ONLY the screen-space cinematic post (vignette + grain) — the
+// LOW_END tier drops it; the folds / AO / rim / weave material look is untouched.
+export function createClothMaterial(gl, { post = true } = {}) {
   const microMap = createWeaveNormalTexture(gl);
   const mesoMap = createMesoNormalTexture(gl);
 
@@ -200,48 +202,82 @@ export function createClothMaterial(gl) {
         '#include <begin_vertex>\n\tvShade = aShade;\n\tvClothUv = uv;',
       );
 
+    let frag = shader.fragmentShader
+      // Weave-tied roughness shimmer (alpha of the micro map).
+      .replace(
+        '#include <roughnessmap_fragment>',
+        '#include <roughnessmap_fragment>\n\troughnessFactor += ( texture2D( normalMap, vNormalMapUv ).a - 0.5 ) * 2.0 * uRoughVar;\n\troughnessFactor = clamp( roughnessFactor, 0.04, 1.0 );',
+      )
+      // Blend the meso wrinkle normal in a derivative-built tangent frame; compute the rim.
+      .replace(
+        '#include <normal_fragment_maps>',
+        [
+          '#include <normal_fragment_maps>',
+          '\t{',
+          '\t\tvec3 mesoN = texture2D( mesoNormalMap, vClothUv * uMesoRepeat ).xyz * 2.0 - 1.0;',
+          '\t\tvec3 vp = - vViewPosition;',
+          '\t\tvec3 q0 = dFdx( vp ); vec3 q1 = dFdy( vp );',
+          '\t\tvec2 s0 = dFdx( vClothUv ); vec2 s1 = dFdy( vClothUv );',
+          '\t\tvec3 Td = q0 * s1.y - q1 * s0.y;',
+          '\t\tTd = normalize( Td - normal * dot( normal, Td ) );',
+          '\t\tvec3 Bd = normalize( cross( normal, Td ) );',
+          '\t\tnormal = normalize( normal + ( Td * mesoN.x + Bd * mesoN.y ) * uMesoAmp );',
+          '\t}',
+          '\tfloat clothRim = pow( 1.0 - clamp( dot( normal, normalize( vViewPosition ) ), 0.0, 1.0 ), 3.0 );',
+        ].join('\n'),
+      )
+      // Crease AO (+ albedo var) on all light, then the neutral fabric rim. Alpha stays 1.
+      .replace(
+        '#include <opaque_fragment>',
+        '#include <opaque_fragment>\n\tgl_FragColor.rgb *= vShade;\n\tgl_FragColor.rgb += clothRim * uRimStrength * uRimColor;',
+      );
+
+    // Cinematic post in display space: a gentle vignette + fine animated film grain.
+    // Skipped entirely on the LOW_END tier (post === false).
+    if (post) {
+      frag = frag.replace(
+        '#include <colorspace_fragment>',
+        [
+          '#include <colorspace_fragment>',
+          '\tvec2 clothScreenUv = gl_FragCoord.xy / uResolution;',
+          `\tgl_FragColor.rgb *= 1.0 - ${VIGNETTE_STRENGTH.toFixed(3)} * smoothstep( ${VIGNETTE_INNER.toFixed(3)}, ${VIGNETTE_OUTER.toFixed(3)}, distance( clothScreenUv, vec2( 0.5 ) ) );`,
+        ].join('\n'),
+      );
+    }
+
     shader.fragmentShader =
       'uniform sampler2D mesoNormalMap;\nuniform vec2 uMesoRepeat;\nuniform float uMesoAmp;\nuniform float uRimStrength;\nuniform vec3 uRimColor;\nuniform float uRoughVar;\nuniform float uTime;\nuniform vec2 uResolution;\nvarying float vShade;\nvarying vec2 vClothUv;\n' +
-      shader.fragmentShader
-        // Weave-tied roughness shimmer (alpha of the micro map).
-        .replace(
-          '#include <roughnessmap_fragment>',
-          '#include <roughnessmap_fragment>\n\troughnessFactor += ( texture2D( normalMap, vNormalMapUv ).a - 0.5 ) * 2.0 * uRoughVar;\n\troughnessFactor = clamp( roughnessFactor, 0.04, 1.0 );',
-        )
-        // Blend the meso wrinkle normal in a derivative-built tangent frame; compute the rim.
-        .replace(
-          '#include <normal_fragment_maps>',
-          [
-            '#include <normal_fragment_maps>',
-            '\t{',
-            '\t\tvec3 mesoN = texture2D( mesoNormalMap, vClothUv * uMesoRepeat ).xyz * 2.0 - 1.0;',
-            '\t\tvec3 vp = - vViewPosition;',
-            '\t\tvec3 q0 = dFdx( vp ); vec3 q1 = dFdy( vp );',
-            '\t\tvec2 s0 = dFdx( vClothUv ); vec2 s1 = dFdy( vClothUv );',
-            '\t\tvec3 Td = q0 * s1.y - q1 * s0.y;',
-            '\t\tTd = normalize( Td - normal * dot( normal, Td ) );',
-            '\t\tvec3 Bd = normalize( cross( normal, Td ) );',
-            '\t\tnormal = normalize( normal + ( Td * mesoN.x + Bd * mesoN.y ) * uMesoAmp );',
-            '\t}',
-            '\tfloat clothRim = pow( 1.0 - clamp( dot( normal, normalize( vViewPosition ) ), 0.0, 1.0 ), 3.0 );',
-          ].join('\n'),
-        )
-        // Crease AO (+ albedo var) on all light, then the neutral fabric rim. Alpha stays 1.
-        .replace(
-          '#include <opaque_fragment>',
-          '#include <opaque_fragment>\n\tgl_FragColor.rgb *= vShade;\n\tgl_FragColor.rgb += clothRim * uRimStrength * uRimColor;',
-        )
-        // Cinematic post in display space: a gentle vignette + fine animated film grain.
-        .replace(
-          '#include <colorspace_fragment>',
-          [
-            '#include <colorspace_fragment>',
-            '\tvec2 clothScreenUv = gl_FragCoord.xy / uResolution;',
-            `\tgl_FragColor.rgb *= 1.0 - ${VIGNETTE_STRENGTH.toFixed(3)} * smoothstep( ${VIGNETTE_INNER.toFixed(3)}, ${VIGNETTE_OUTER.toFixed(3)}, distance( clothScreenUv, vec2( 0.5 ) ) );`,
-          ].join('\n'),
-        );
+      frag;
   };
 
+  return material;
+}
+
+// Cheap LOW_END material: an UNLIT MeshBasic (no PBR lighting, no normal maps, no env, no rim,
+// no post). It still shows the physics folds via the baked per-vertex crease AO (aShade), which
+// CurtainCloth keeps updating — so it reads as folded fabric, just flatter / more faceted. No
+// textures are generated, so construction is cheap too. disposeClothMaterial handles it (no
+// normalMap / mesoNormalMap to free). CurtainCloth also skips the per-frame normal recompute for
+// this material (unlit → normals unused).
+export function createCheapClothMaterial() {
+  const material = new THREE.MeshBasicMaterial({
+    color: CLOTH_COLOR,
+    side: THREE.DoubleSide,
+  });
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader =
+      'attribute float aShade;\nvarying float vShade;\n' +
+      shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        '#include <begin_vertex>\n\tvShade = aShade;',
+      );
+    shader.fragmentShader =
+      'varying float vShade;\n' +
+      shader.fragmentShader.replace(
+        '#include <color_fragment>',
+        '#include <color_fragment>\n\tdiffuseColor.rgb *= vShade;',
+      );
+  };
   return material;
 }
 

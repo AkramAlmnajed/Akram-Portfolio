@@ -102,7 +102,15 @@ const Navbar = () => {
     }`;
 
   return (
-    <div className="w-full h-20 fixed top-0 z-50 bg-bg/70 backdrop-blur-md mx-auto flex justify-between items-center border-b border-line px-4 md:px-8">
+    <div
+      className="w-full fixed top-0 z-50 bg-bg/70 backdrop-blur-md border-b border-line"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
+      {/* Inner row is the actual h-20 bar; the wrapper's safe-area-inset-top padding
+          lets the bg/blur fill edge-to-edge UNDER the notch/status bar now that the
+          viewport is `viewport-fit=cover`. On non-notched devices + desktop the
+          inset is 0px, so this renders identically to before. */}
+      <div className="w-full h-20 mx-auto flex justify-between items-center px-4 md:px-8">
       <div className="font-titleFont font-semibold text-ink text-xl md:text-2xl tracking-tight">
         Welcome To My World
       </div>
@@ -159,7 +167,7 @@ const Navbar = () => {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: "100%", opacity: 0.95 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="w-[84%] h-screen overflow-scroll fixed top-0 right-0 bg-bg p-6 scrollbar-hide border-l border-line will-change-transform outline-none"
+                className="w-[84%] h-lvh overflow-scroll fixed top-0 right-0 bg-bg p-6 scrollbar-hide border-l border-line will-change-transform outline-none"
               >
                 <div className="flex flex-col gap-10 py-8 relative">
                   <ul className="flex flex-col gap-5 font-bodyFont">
@@ -213,6 +221,7 @@ const Navbar = () => {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
       </div>
     </div>
   );

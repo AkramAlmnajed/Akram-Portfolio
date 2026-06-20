@@ -37,7 +37,7 @@
     /* Smooth in-page anchor jumps (skip link, native #links); the global
        reduced-motion block below forces this back to `auto`. */
     scroll-behavior: smooth;
-    scroll-padding-top: 5.5rem; /* clear the fixed h-20 navbar */
+    scroll-padding-top: calc(5.5rem + env(safe-area-inset-top, 0px)); /* clear the fixed h-20 navbar (taller under a notch with viewport-fit=cover) */
     /* Canvas fill lives on <html> ONLY. If <body> also paints this bg it would
        cover the fixed -z-10 najmeh pattern (body is normal-flow, painted after
        negative-z layers), hiding it. <html> bg sits behind the pattern. */
@@ -518,6 +518,17 @@ html.lenis body {
     to   { stroke-dashoffset: 0; }
 }
 
+/* Pin a full-viewport box to the LARGE viewport so the mobile URL/toolbar showing
+   or hiding (which changes the visual-viewport height) does NOT resize it — the
+   fixed Damascene background and the mobile nav drawer must not jump as the chrome
+   animates. `lvh` = the toolbar-hidden height; the box simply extends behind the
+   toolbar while it is visible. `vh` fallback for engines without large-viewport
+   units (on desktop lvh === vh, so the desktop result is identical). */
+.h-lvh {
+    height: 100vh;
+    height: 100lvh;
+}
+
 /* Background layers — slow parallax drift at two depths/speeds. */
 .bg-drift-a { animation: bgDriftA 34s ease-in-out infinite; will-change: transform; }
 .bg-drift-b { animation: bgDriftB 26s ease-in-out infinite; will-change: transform; }
@@ -556,19 +567,23 @@ html.lenis body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 360px;
-    height: 360px;
-    margin: -180px 0 0 -180px;
+    /* Match the desktop .bg-cursor-glow EXACTLY so it reads identical, just following touch: same
+       520px radius, same low gradient alphas (0.09/0.04), same screen blend. (Was 360px / 0.18 /
+       no blend — visibly stronger than desktop.) */
+    width: 520px;
+    height: 520px;
+    margin: -260px 0 0 -260px;
     border-radius: 9999px;
     pointer-events: none;
     z-index: 30;
     opacity: 0;
     background: radial-gradient(
         circle,
-        rgba(201, 162, 39, 0.18) 0%,
-        rgba(201, 162, 39, 0.07) 34%,
+        rgba(201, 162, 39, 0.09) 0%,
+        rgba(201, 162, 39, 0.04) 30%,
         transparent 66%
     );
+    mix-blend-mode: screen;
     will-change: transform, opacity;
     contain: strict;
 }
@@ -578,9 +593,19 @@ html.lenis body {
 .glyph-float   { animation: floaty var(--dur, 7s) ease-in-out infinite; animation-delay: var(--d, 0s); }
 .glyph-spin    { animation: spinSlow var(--dur, 40s) linear infinite; transform-box: fill-box; transform-origin: center; }
 
-/* Portrait orbit ring — the framework logos circle the photo and stay upright. */
-.orbit-ring  { animation: spinSlow 32s linear infinite; will-change: transform; }
-.orbit-upright { animation: spinSlowRev 32s linear infinite; }
+/* Portrait orbit ring — the framework logos circle the photo and stay upright.
+   will-change: transform promotes each animated layer to its own GPU compositor layer
+   and backface-visibility: hidden keeps the rotate/counter-rotate on the GPU, so the
+   continuous spin composites cheaply (no main-thread repaint per frame) even on a
+   LOW_END phone. (will-change IS the promotion here; a base translateZ(0) would be
+   clobbered by the rotate keyframes, so it's redundant and omitted.) The spin runs on
+   ALL motion-allowing devices now — RightBanner gates orbit-ring/orbit-upright on
+   `spin` (phones included); only the per-glyph float + drop-shadow stay desktop-only.
+   Scoped to the orbit's OWN floats — NOT the global .glyph-float — so the ambient
+   field's ~18 shared glyphs (a SEPARATE element) aren't promoted by this. */
+.orbit-ring  { animation: spinSlow 32s linear infinite; will-change: transform; backface-visibility: hidden; }
+.orbit-upright { animation: spinSlowRev 32s linear infinite; will-change: transform; backface-visibility: hidden; }
+.orbit-ring .glyph-float { will-change: transform; }
 
 /* Mobile (< md): drop the per-logo independent float so the orbit logos sit at
    a single, consistent radius — an even, symmetric ring with a clear gap —

@@ -34,7 +34,12 @@ const RightBanner = () => {
   // halo pulse) whenever the portrait scrolls out of view — frozen in place, no
   // GPU, resumes identically on re-entry.
   const [clusterRef, inView] = useInView({ rootMargin: "140px" });
+  // `active` = real mouse (desktop): gates the parallax + the RICH per-glyph
+  // extras (drop-shadow glow + bob). `spin` = the continuous orbit itself, which
+  // now runs on EVERY device that allows motion (mobile included) — only
+  // prefers-reduced-motion freezes it to static icons.
   const active = useFinePointer();
+  const spin = !reduce;
 
   // Cursor parallax on the orbit cluster via the SHARED idle-stopping engine
   // (one page-wide rAF; transform only; off for coarse / reduced).
@@ -90,14 +95,32 @@ const RightBanner = () => {
 
         {/* Orbiting framework logos — bare glyphs, no frame. parallax wrapper
             (JS) → spinning ring → counter-spin + float per logo. */}
-        <div ref={parallaxRef} className="pointer-events-none absolute inset-0 will-change-transform">
+        <div
+          ref={parallaxRef}
+          // will-change promotes this wrapper to its own compositor layer for the
+          // desktop cursor parallax. On touch (`active` false) the parallax never
+          // runs, so the promotion is pure cost: a static promoted layer holding the
+          // logos desyncs from the scrolling cluster on mobile (the logos appear to
+          // "stop scrolling" while the portrait scrolls). Drop it on touch so the
+          // logos stay in the cluster's normal scroll layer; desktop is unchanged.
+          className={`pointer-events-none absolute inset-0${active ? " will-change-transform" : ""}`}
+        >
           {/* Static centering wrapper (translate stays put) holds the spinning
               ring (rotate only) — so the spin keyframe never clobbers the
               centering and the logos circle the portrait's true center. On phones
               the ring is tucked tighter to the (smaller) portrait so the logos
               don't hug the screen edges or crowd the text above; md+ unchanged. */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] md:w-[124%] md:h-[124%]">
-          <div className="orbit-ring relative w-full h-full">
+          {/* MOTION GATING: the ring spin + per-logo counter-spin (orbit-ring /
+              orbit-upright — transform-only, compositor-promoted, time-driven) run on
+              ALL motion-allowing devices (`spin` = !reduced-motion), PHONES INCLUDED,
+              so the orbit circles on mobile too. The RICH desktop-only extras stay
+              gated to `active` (fine pointer): the per-glyph float bob + the gold
+              drop-shadow filter — those six per-frame re-rasterising drop-shadows were
+              the original mobile jank, so touch keeps the cheap transform-only spin
+              without them. Reduced-motion freezes everything to static icons. (This is
+              the portrait ORBIT only — separate from the ambient field glyphs.) */}
+          <div className={`relative w-full h-full${spin ? " orbit-ring" : ""}`}>
             {ORBIT.map(({ Icon, label, style, dur, d }) => (
               <span
                 key={label}
@@ -105,14 +128,18 @@ const RightBanner = () => {
                 style={style}
                 title={label}
               >
-                <span className="orbit-upright block">
+                <span className={`block${spin ? " orbit-upright" : ""}`}>
                   <span
-                    className="glyph-float block text-accent text-lg md:text-[28px]"
-                    style={{
-                      "--dur": dur,
-                      "--d": d,
-                      filter: "drop-shadow(0 2px 10px rgba(201,162,39,0.45))",
-                    }}
+                    className={`block text-accent text-lg md:text-[28px]${active ? " glyph-float" : ""}`}
+                    style={
+                      active
+                        ? {
+                            "--dur": dur,
+                            "--d": d,
+                            filter: "drop-shadow(0 2px 10px rgba(201,162,39,0.45))",
+                          }
+                        : undefined
+                    }
                   >
                     <Icon />
                   </span>

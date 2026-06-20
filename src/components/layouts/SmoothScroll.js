@@ -42,6 +42,20 @@ const SmoothScroll = () => {
       if (!raf) raf = requestAnimationFrame(loop);
     };
 
+    // Mobile browser chrome (address bar / toolbar) and the soft keyboard fire
+    // `resize` with the SAME width and only a height change. Re-waking Lenis on
+    // every chrome toggle thrashed the scroll loop (and the fixed background) during
+    // a normal mobile scroll, so we ignore EVERY height-only resize — only a WIDTH
+    // change is a real re-layout (that also covers orientation flips, which swap
+    // innerWidth). orientationchange is handled explicitly as a backstop.
+    let lastW = window.innerWidth;
+    const onResize = () => {
+      const w = window.innerWidth;
+      if (w === lastW) return; // height-only → chrome / keyboard toggle, not re-layout
+      lastW = w;
+      start();
+    };
+
     // Wake on anything that could start a scroll. Passive + capture so we never
     // block input and the loop is alive before Lenis processes the delta.
     const wakeOpts = { passive: true, capture: true };
@@ -49,7 +63,8 @@ const SmoothScroll = () => {
     window.addEventListener("touchstart", start, wakeOpts);
     window.addEventListener("touchmove", start, wakeOpts);
     window.addEventListener("keydown", start, { capture: true });
-    window.addEventListener("resize", start, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("orientationchange", start, { passive: true });
 
     // Programmatic scrolls (nav links, back-to-top, skip link) must wake too.
     const originalScrollTo = lenis.scrollTo.bind(lenis);
@@ -65,7 +80,8 @@ const SmoothScroll = () => {
       window.removeEventListener("touchstart", start, wakeOpts);
       window.removeEventListener("touchmove", start, wakeOpts);
       window.removeEventListener("keydown", start, { capture: true });
-      window.removeEventListener("resize", start);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", start);
       if (raf) cancelAnimationFrame(raf);
       setLenis(null);
       lenis.destroy();
